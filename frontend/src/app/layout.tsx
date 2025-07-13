@@ -1,4 +1,6 @@
 import React from 'react';
+import { Providers } from '@/components/Providers';
+import './globals.css';
 
 export const metadata = {
   title: 'Gym Track',
@@ -12,7 +14,9 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps): React.ReactNode {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 } 

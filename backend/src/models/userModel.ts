@@ -5,8 +5,9 @@ const userSchema = new Schema<IUser>(
   {
     name: {
       type: String,
-      required: [true, 'El nombre es obligatorio'],
+      required: false,
       trim: true,
+      default: '',
     },
     email: {
       type: String,
