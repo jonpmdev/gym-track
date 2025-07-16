@@ -1,12 +1,16 @@
 .dashboard-card {
   background: rgba(255, 255, 255, 0.95);
-  padding: 2rem;
+  padding: 2.5rem;
   border-radius: 15px;
   box-shadow: 
     0 0 20px rgba(0,0,0,0.1),
     0 0 60px rgba(0,0,0,0.05);
   border: 1px solid rgba(255,255,255,0.2);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-bottom: 1.5rem;
 }
 
 .dashboard-card:hover {
@@ -14,6 +18,17 @@
   box-shadow: 
     0 5px 30px rgba(0,0,0,0.15),
     0 0 60px rgba(0,0,0,0.1);
+}
+
+.dashboard-card h2 {
+  margin-bottom: 1.5rem !important;
+  font-size: 1.5rem !important;
+}
+
+.dashboard-card p {
+  margin-bottom: 2rem !important;
+  flex-grow: 1;
+  line-height: 1.6;
 }
 
 .dashboard-title {
@@ -37,8 +52,8 @@
 }
 
 .dashboard-section {
-  margin-bottom: 2rem;
-  padding: 2rem;
+  margin-bottom: 3rem;
+  padding: 2.5rem;
   background: white;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -48,11 +63,12 @@
 .primary-button.dashboard-button {
   width: auto;
   min-width: 200px;
-  padding: 12px 24px;
+  padding: 14px 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  margin-top: auto;
 }
 
 .primary-button.dashboard-button::before {
