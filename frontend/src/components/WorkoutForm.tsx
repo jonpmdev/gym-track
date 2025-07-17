@@ -244,8 +244,8 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
                 );
                 return (
                   <div key={index} className="exercise-card">
-                    <div className="flex justify-between items-start">
-                      <div>
+                    <div className="exercise-content">
+                      <div className="exercise-details">
                         <h5 className="font-medium">{exercise.name}</h5>
                         <p className="text-sm text-gray-600">
                           {exercise.sets} series x {exercise.reps} repeticiones
@@ -260,7 +260,7 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
                           </p>
                         )}
                       </div>
-                      <div className="flex space-x-2 exercise-actions">
+                      <div className="exercise-actions">
                         <button
                           type="button"
                           onClick={() => editExercise(exerciseIndex)}
