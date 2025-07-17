@@ -15,22 +15,24 @@ export interface User {
 
 export interface Exercise {
   name: string;
-  sets: {
-    reps: number;
-    weight: number;
-    completed: boolean;
-  }[];
-  notes?: string;
+  sets: number;
+  reps: string;
+  weight?: number;
+  rest?: string;
+  muscleGroups?: string[];
+  focus?: string;
+  completed: boolean;
+  day: string;
 }
 
 export interface Workout {
   id: string;
-  name: string;
-  date: string;
+  title: string;
   exercises: Exercise[];
-  duration?: number;
   notes?: string;
   completed: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Progress {

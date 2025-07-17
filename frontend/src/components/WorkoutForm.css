@@ -1,0 +1,648 @@
+/* Estilos base para el formulario de entrenamiento */
+.workout-form {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 50px;
+  border-radius: 15px;
+  box-shadow: 
+    0 0 20px rgba(0,0,0,0.3),
+    0 0 60px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  overflow: hidden;
+}
+
+.workout-form-title {
+  font-family: 'Teko', sans-serif;
+  color: var(--text-dark);
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+  line-height: 1;
+}
+
+.workout-form-section {
+  margin-bottom: 3rem;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.workout-form-section-title {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  color: var(--text-dark);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Estilos para las pestañas de días */
+.days-tabs-container {
+  width: 100%;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.days-tabs {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.day-tab {
+  padding: 0.85rem 0.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  flex: 1;
+  text-align: center;
+  margin: 0 0.25rem;
+}
+
+.day-tab:first-child {
+  margin-left: 0;
+}
+
+.day-tab:last-child {
+  margin-right: 0;
+}
+
+.day-tab.active {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+.day-tab:hover:not(.active) {
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.day-content {
+  background-color: rgba(243, 244, 246, 0.7);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 1rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.day-content h4 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+  display: inline-block;
+}
+
+/* Estilos para las tarjetas de ejercicios */
+.exercise-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(229, 231, 235, 0.7);
+  position: relative;
+}
+
+.exercise-card:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transform: translateY(-3px);
+  border-left: 4px solid var(--primary-color);
+}
+
+.exercise-card h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+
+.exercise-card p {
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.exercise-card .text-gray-600 {
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.exercise-card .text-gray-500 {
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Estructura flex para las tarjetas de ejercicios */
+.exercise-card .flex {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.exercise-card .flex > div:first-child {
+  flex: 1;
+  padding-right: 1rem;
+}
+
+.exercise-card .exercise-actions {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Botones de editar y eliminar */
+.exercise-card button {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.exercise-card button.text-blue-600 {
+  color: #2563eb;
+  background-color: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.exercise-card button.text-blue-600:hover {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: #1d4ed8;
+}
+
+.exercise-card button.text-red-600 {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  margin-left: 0.5rem;
+}
+
+.exercise-card button.text-red-600:hover {
+  background-color: rgba(220, 38, 38, 0.2);
+  color: #b91c1c;
+}
+
+/* Estilo para los grupos de ejercicios */
+.exercise-card .text-sm {
+  font-size: 0.875rem;
+}
+
+/* Estilos para los formularios */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #4b5563;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  min-width: 150px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.secondary-button {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.secondary-button:hover {
+  background-color: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+.danger-button {
+  background-color: #ef4444;
+  color: white;
+}
+
+.danger-button:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.checkbox-item.selected {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.checkbox-item:hover:not(.selected) {
+  background-color: #f9fafb;
+  transform: translateY(-1px);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancel-button {
+  background-color: #ef4444;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+
+/* Sección para agregar nuevo ejercicio */
+.day-content .bg-white {
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  transition: all 0.3s ease;
+  padding: 1.5rem;
+}
+
+.day-content .bg-white:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.day-content .bg-white h5 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1f2937;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+  margin-bottom: 1.25rem;
+}
+
+.add-exercise-button {
+  background-color: #10b981;
+  color: white;
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  margin-top: 1rem;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.add-exercise-button:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Mensaje cuando no hay ejercicios */
+.text-gray-500.text-center.py-4.mb-6 {
+  background-color: rgba(243, 244, 246, 0.9);
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  padding: 1.5rem;
+  font-style: italic;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Media queries para tablets */
+@media (max-width: 1024px) {
+  .workout-form {
+    padding: 30px;
+    max-width: 95%;
+  }
+  
+  .workout-form-section {
+    padding: 1.25rem;
+  }
+  
+  .day-content {
+    padding: 1.5rem;
+  }
+  
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .checkbox-item {
+    margin: 0;
+    justify-content: center;
+  }
+  
+  .day-tab {
+    padding: 0.75rem 0.4rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Media queries para dispositivos móviles */
+@media (max-width: 768px) {
+  .days-tabs-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .days-tabs-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+  
+  .days-tabs {
+    display: inline-flex;
+    min-width: min-content;
+    padding-bottom: 5px;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .day-tab {
+    flex: none;
+    margin-right: 0.5rem;
+    padding: 0.7rem 1rem;
+  }
+  
+  /* Indicador de desplazamiento horizontal para pestañas */
+  .days-tabs-container::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.9));
+    pointer-events: none;
+    opacity: 0.8;
+    display: block;
+  }
+}
+
+@media (max-width: 640px) {
+  .workout-form {
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    max-width: calc(100% - 20px);
+  }
+
+  .workout-form-section {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .workout-form-title {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .workout-form-section-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-row .form-group {
+    width: 100% !important;
+  }
+
+  .day-tab {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .day-content {
+    padding: 1rem;
+  }
+
+  .day-content h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    border-bottom-width: 1px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .exercise-card {
+    padding: 1rem;
+  }
+
+  .exercise-card h5 {
+    font-size: 1rem;
+  }
+
+  .exercise-card .flex {
+    flex-direction: column;
+  }
+
+  .exercise-card .flex .exercise-actions {
+    flex-direction: row;
+    margin-top: 0.75rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .exercise-card .exercise-actions button {
+    width: 48%;
+    text-align: center;
+    padding: 0.6rem 0;
+    margin: 0;
+  }
+
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .checkbox-item {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    margin: 0;
+    justify-content: center;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .form-actions button {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .text-gray-500.text-center.py-4.mb-6 {
+    padding: 1rem;
+    font-size: 0.9rem;
+    border-width: 1px;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .form-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .form-input, .form-select {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  .day-content .bg-white {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .day-content .bg-white h5 {
+    font-size: 1.1rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 380px) {
+  .workout-form {
+    padding: 15px;
+    margin: 5px;
+  }
+  
+  .day-tab {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+    min-width: 70px;
+  }
+  
+  .checkbox-group {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .checkbox-item {
+    width: 100%;
+    text-align: center;
+  }
+} 
