@@ -91,7 +91,13 @@ export default function WorkoutsPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Error al crear el entrenamiento');
+        const data = await res.json();
+        if (data.errors) {
+          // Si hay errores de validación, mostrarlos
+          const errorMessages = data.errors.map((err: any) => err.msg).join(', ');
+          throw new Error(`Error al crear el entrenamiento: ${errorMessages}`);
+        }
+        throw new Error(data.message || 'Error al crear el entrenamiento');
       }
 
       await fetchWorkouts();
@@ -100,6 +106,7 @@ export default function WorkoutsPage() {
       router.push('/workouts');
     } catch (err: any) {
       setError(err.message);
+      console.error('Error al crear el entrenamiento:', err);
     } finally {
       setLoading(false);
     }
@@ -121,7 +128,13 @@ export default function WorkoutsPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Error al actualizar el entrenamiento');
+        const data = await res.json();
+        if (data.errors) {
+          // Si hay errores de validación, mostrarlos
+          const errorMessages = data.errors.map((err: any) => err.msg).join(', ');
+          throw new Error(`Error al actualizar el entrenamiento: ${errorMessages}`);
+        }
+        throw new Error(data.message || 'Error al actualizar el entrenamiento');
       }
 
       await fetchWorkouts();
@@ -131,6 +144,7 @@ export default function WorkoutsPage() {
       router.push('/workouts');
     } catch (err: any) {
       setError(err.message);
+      console.error('Error al actualizar el entrenamiento:', err);
     } finally {
       setLoading(false);
     }
@@ -163,8 +177,35 @@ export default function WorkoutsPage() {
     }
   };
 
+  const handleToggleComplete = async (workout: Workout) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5000/api/workouts/${workout.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          completed: !workout.completed
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Error al actualizar el estado del entrenamiento');
+      }
+
+      await fetchWorkouts();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleViewWorkout = (workout: Workout) => {
-    router.push(`/workouts?id=${workout.id}`);
+    router.push(`/workouts/${workout.id}`);
   };
 
   const handleNewWorkout = () => {
@@ -295,6 +336,12 @@ export default function WorkoutsPage() {
                     onClick={() => handleViewWorkout(workout)}
                   >
                     Ver detalles
+                  </button>
+                  <button 
+                    className={`workout-action-button ${workout.completed ? 'incomplete' : 'complete'}`}
+                    onClick={() => handleToggleComplete(workout)}
+                  >
+                    {workout.completed ? 'Marcar incompleto' : 'Marcar completado'}
                   </button>
                   <button 
                     className="workout-action-button delete"

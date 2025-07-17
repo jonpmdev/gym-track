@@ -6,14 +6,28 @@ const exerciseSchema = new Schema<IExercise>({
     type: String,
     required: true,
   },
-  sets: [
-    {
-      reps: { type: Number, required: true },
-      weight: { type: Number, required: true },
-      completed: { type: Boolean, default: false },
-    },
-  ],
-  notes: String,
+  sets: {
+    type: Number,
+    required: true,
+  },
+  reps: {
+    type: String,
+    required: true,
+  },
+  weight: {
+    type: Number,
+  },
+  rest: String,
+  muscleGroups: [String],
+  focus: String,
+  completed: {
+    type: Boolean,
+    default: false,
+  },
+  day: {
+    type: String,
+    required: true,
+  },
 });
 
 const workoutSchema = new Schema<IWorkout>(
@@ -23,19 +37,11 @@ const workoutSchema = new Schema<IWorkout>(
       required: true,
       ref: 'User',
     },
-    name: {
+    title: {
       type: String,
       required: true,
     },
-    date: {
-      type: Date,
-      default: Date.now,
-    },
     exercises: [exerciseSchema],
-    duration: {
-      type: Number, // duración en minutos
-      default: 0,
-    },
     notes: String,
     completed: {
       type: Boolean,

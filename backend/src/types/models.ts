@@ -19,24 +19,22 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
-export interface ISet {
-  reps: number;
-  weight: number;
-  completed: boolean;
-}
-
 export interface IExercise {
   name: string;
-  sets: ISet[];
-  notes?: string;
+  sets: number;
+  reps: string;
+  weight?: number;
+  rest?: string;
+  muscleGroups?: string[];
+  focus?: string;
+  completed: boolean;
+  day: string;
 }
 
 export interface IWorkout extends Document {
   user: string;
-  name: string;
-  date: Date;
+  title: string;
   exercises: IExercise[];
-  duration?: number;
   notes?: string;
   completed: boolean;
   createdAt: Date;

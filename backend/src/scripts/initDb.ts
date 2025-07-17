@@ -53,41 +53,35 @@ async function initializeDatabase() {
         validator: {
           $jsonSchema: {
             bsonType: 'object',
-            required: ['user', 'name', 'date', 'exercises'],
+            required: ['user', 'title', 'exercises'],
             properties: {
               user: {
                 bsonType: 'string'
               },
-              name: {
+              title: {
                 bsonType: 'string'
-              },
-              date: {
-                bsonType: 'date'
               },
               exercises: {
                 bsonType: 'array',
                 items: {
                   bsonType: 'object',
-                  required: ['name', 'sets'],
+                  required: ['name', 'sets', 'reps', 'day', 'completed'],
                   properties: {
                     name: { bsonType: 'string' },
-                    sets: {
+                    sets: { bsonType: 'number' },
+                    reps: { bsonType: 'string' },
+                    weight: { bsonType: 'number' },
+                    rest: { bsonType: 'string' },
+                    muscleGroups: {
                       bsonType: 'array',
-                      items: {
-                        bsonType: 'object',
-                        required: ['reps', 'weight', 'completed'],
-                        properties: {
-                          reps: { bsonType: 'number' },
-                          weight: { bsonType: 'number' },
-                          completed: { bsonType: 'bool' }
-                        }
-                      }
+                      items: { bsonType: 'string' }
                     },
-                    notes: { bsonType: 'string' }
+                    focus: { bsonType: 'string' },
+                    completed: { bsonType: 'bool' },
+                    day: { bsonType: 'string' }
                   }
                 }
               },
-              duration: { bsonType: 'number' },
               notes: { bsonType: 'string' },
               completed: { bsonType: 'bool' }
             }
@@ -155,7 +149,6 @@ async function initializeDatabase() {
     console.log('Índice único creado/actualizado para users.email');
 
     await db.collection('workouts').createIndex({ user: 1 });
-    await db.collection('workouts').createIndex({ date: 1 });
     console.log('Índices creados/actualizados para workouts');
 
     await db.collection('progress').createIndex({ user: 1 });

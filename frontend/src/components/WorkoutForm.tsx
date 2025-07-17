@@ -180,9 +180,22 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
       return;
     }
     
+    // Asegurarse de que todos los ejercicios tengan el campo completed
+    const validatedExercises = exercises.map(exercise => ({
+      ...exercise,
+      completed: exercise.completed !== undefined ? exercise.completed : false
+    }));
+    
+    // Depuración: mostrar los datos que se van a enviar
+    console.log('Datos del entrenamiento a enviar:', {
+      title,
+      exercises: validatedExercises,
+      notes
+    });
+    
     onSubmit({
       title,
-      exercises,
+      exercises: validatedExercises,
       notes,
     });
   };

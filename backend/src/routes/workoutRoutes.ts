@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { check } from 'express-validator';
+import { check, validationResult } from 'express-validator';
 import {
   getWorkouts,
   getWorkout,
@@ -10,6 +10,18 @@ import {
 import { auth } from '../middleware/auth';
 
 const router = Router();
+
+// Middleware para validar errores
+const validateErrors = (req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      message: 'Error de validación', 
+      errors: errors.array() 
+    });
+  }
+  next();
+};
 
 // Todas las rutas requieren autenticación
 router.use(auth);
@@ -24,13 +36,14 @@ router.get('/:id', getWorkout);
 router.post(
   '/',
   [
-    check('name', 'El nombre del entrenamiento es obligatorio').not().isEmpty(),
+    check('title', 'El título del entrenamiento es obligatorio').not().isEmpty(),
     check('exercises', 'Debe incluir al menos un ejercicio').isArray({ min: 1 }),
     check('exercises.*.name', 'El nombre del ejercicio es obligatorio').not().isEmpty(),
-    check('exercises.*.sets', 'Debe incluir al menos una serie').isArray({ min: 1 }),
-    check('exercises.*.sets.*.reps', 'El número de repeticiones es obligatorio').isNumeric(),
-    check('exercises.*.sets.*.weight', 'El peso es obligatorio').isNumeric(),
+    check('exercises.*.sets', 'El número de series es obligatorio').isNumeric(),
+    check('exercises.*.reps', 'El número de repeticiones es obligatorio').not().isEmpty(),
+    check('exercises.*.day', 'El día del ejercicio es obligatorio').not().isEmpty(),
   ],
+  validateErrors,
   createWorkout
 );
 
@@ -38,15 +51,14 @@ router.post(
 router.put(
   '/:id',
   [
-    check('name', 'El nombre del entrenamiento es obligatorio').optional().not().isEmpty(),
+    check('title', 'El título del entrenamiento es obligatorio').optional().not().isEmpty(),
     check('exercises').optional().isArray(),
     check('exercises.*.name', 'El nombre del ejercicio es obligatorio').optional().not().isEmpty(),
-    check('exercises.*.sets').optional().isArray(),
-    check('exercises.*.sets.*.reps', 'El número de repeticiones es obligatorio')
-      .optional()
-      .isNumeric(),
-    check('exercises.*.sets.*.weight', 'El peso es obligatorio').optional().isNumeric(),
+    check('exercises.*.sets', 'El número de series es obligatorio').optional().isNumeric(),
+    check('exercises.*.reps', 'El número de repeticiones es obligatorio').optional().not().isEmpty(),
+    check('exercises.*.day', 'El día del ejercicio es obligatorio').optional().not().isEmpty(),
   ],
+  validateErrors,
   updateWorkout
 );
 

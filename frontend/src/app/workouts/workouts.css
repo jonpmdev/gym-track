@@ -123,6 +123,8 @@
   border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .workout-action-button {
@@ -138,6 +140,22 @@
 
 .workout-action-button.view:hover {
   color: #1d4ed8;
+}
+
+.workout-action-button.complete {
+  color: #059669;
+}
+
+.workout-action-button.complete:hover {
+  color: #047857;
+}
+
+.workout-action-button.incomplete {
+  color: #d97706;
+}
+
+.workout-action-button.incomplete:hover {
+  color: #b45309;
 }
 
 .workout-action-button.delete {

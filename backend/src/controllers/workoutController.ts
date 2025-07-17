@@ -10,9 +10,10 @@ interface AuthRequest extends Request {
 export const getWorkouts = async (req: AuthRequest, res: Response) => {
   try {
     const workouts = await Workout.find({ user: req.user?._id })
-      .sort({ date: -1 });
+      .sort({ createdAt: -1 });
     res.json(workouts);
   } catch (error) {
+    console.error('Error al obtener los entrenamientos:', error);
     res.status(500).json({ message: 'Error al obtener los entrenamientos' });
   }
 };
@@ -31,6 +32,7 @@ export const getWorkout = async (req: AuthRequest, res: Response) => {
 
     res.json(workout);
   } catch (error) {
+    console.error('Error al obtener el entrenamiento:', error);
     res.status(500).json({ message: 'Error al obtener el entrenamiento' });
   }
 };
@@ -38,21 +40,40 @@ export const getWorkout = async (req: AuthRequest, res: Response) => {
 // Crear un nuevo entrenamiento
 export const createWorkout = async (req: AuthRequest, res: Response) => {
   try {
+    // Asegurarse de que cada ejercicio tenga el campo completed
+    const exercises = req.body.exercises.map((exercise: any) => ({
+      ...exercise,
+      completed: exercise.completed !== undefined ? exercise.completed : false
+    }));
+
     const workout = new Workout({
       ...req.body,
+      exercises,
       user: req.user?._id,
     });
 
     await workout.save();
     res.status(201).json(workout);
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear el entrenamiento' });
+    console.error('Error al crear el entrenamiento:', error);
+    res.status(500).json({ 
+      message: 'Error al crear el entrenamiento',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
   }
 };
 
 // Actualizar un entrenamiento
 export const updateWorkout = async (req: AuthRequest, res: Response) => {
   try {
+    // Si se actualizan ejercicios, asegurarse de que cada uno tenga el campo completed
+    if (req.body.exercises) {
+      req.body.exercises = req.body.exercises.map((exercise: any) => ({
+        ...exercise,
+        completed: exercise.completed !== undefined ? exercise.completed : false
+      }));
+    }
+
     const workout = await Workout.findOneAndUpdate(
       {
         _id: req.params.id,
@@ -68,7 +89,11 @@ export const updateWorkout = async (req: AuthRequest, res: Response) => {
 
     res.json(workout);
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar el entrenamiento' });
+    console.error('Error al actualizar el entrenamiento:', error);
+    res.status(500).json({ 
+      message: 'Error al actualizar el entrenamiento',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
   }
 };
 
@@ -86,6 +111,7 @@ export const deleteWorkout = async (req: AuthRequest, res: Response) => {
 
     res.json({ message: 'Entrenamiento eliminado correctamente' });
   } catch (error) {
+    console.error('Error al eliminar el entrenamiento:', error);
     res.status(500).json({ message: 'Error al eliminar el entrenamiento' });
   }
 }; 
