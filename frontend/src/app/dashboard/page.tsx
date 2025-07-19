@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Workout } from '@/types';
 import './dashboard.css';
@@ -17,7 +18,15 @@ export default function DashboardPage() {
 
   const fetchRecentWorkouts = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
+      console.log('Dashboard - Token usado:', token ? token.substring(0, 20) + '...' : 'No token');
+      
+      if (!token) {
+        console.error('No hay token disponible');
+        router.push('/login');
+        return;
+      }
+
       const res = await fetch('http://localhost:5000/api/workouts?limit=3', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -27,6 +36,13 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json();
         setRecentWorkouts(data);
+      } else {
+        console.error('Error fetching workouts:', await res.text());
+        if (res.status === 401) {
+          // Token inválido, redirigir al login
+          Cookies.remove('token');
+          router.push('/login');
+        }
       }
     } catch (error) {
       console.error('Error fetching recent workouts:', error);

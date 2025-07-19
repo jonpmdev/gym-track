@@ -11,8 +11,8 @@ Aplicación para seguimiento de entrenamiento en el gimnasio. Permite llevar un 
 
 ### Backend
 - Express.js
-- MongoDB (Atlas)
-- Mongoose
+- PostgreSQL (Supabase)
+- Prisma ORM
 - JWT para autenticación
 - TypeScript
 
@@ -33,11 +33,17 @@ gym-track/
 │   │   └── types/         # Definiciones de tipos TypeScript
 │   └── ...
 └── backend/           # API con Express.js
+    ├── prisma/        # Configuración de Prisma ORM
+    │   └── schema.prisma  # Esquema de la base de datos
     ├── src/
     │   ├── config/    # Configuración
+    │   │   ├── config.ts      # Variables de entorno
+    │   │   ├── prisma.ts      # Cliente de Prisma
+    │   │   └── supabase.ts    # Cliente de Supabase
     │   ├── controllers/
     │   │   ├── authController.ts    # Control de autenticación
     │   │   └── workoutController.ts # Control de entrenamientos
+    │   ├── generated/  # Código generado por Prisma
     │   ├── middleware/
     │   │   └── auth.ts    # Middleware de autenticación
     │   ├── models/    # Modelos de datos
@@ -55,7 +61,7 @@ gym-track/
 
 ### Requisitos previos
 - Node.js (v18 o superior)
-- MongoDB Atlas cuenta (o MongoDB local)
+- PostgreSQL (local o en Supabase)
 - Git
 
 ### Configuración
@@ -75,18 +81,27 @@ npm install
 Crear un archivo `.env` en la carpeta backend con:
 ```env
 PORT=5000
-MONGODB_URI=tu_uri_de_mongodb
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/gymtrack"
+SUPABASE_URL=tu_url_de_supabase
+SUPABASE_KEY=tu_clave_anon_de_supabase
 JWT_SECRET=tu_clave_secreta
 JWT_EXPIRES_IN=7d
 ```
 
-3. Configurar el frontend
+3. Generar el cliente Prisma e inicializar la base de datos
+```bash
+npx prisma generate
+npx prisma db push
+npm run initdb
+```
+
+4. Configurar el frontend
 ```bash
 cd ../frontend
 npm install
 ```
 
-4. Iniciar el desarrollo
+5. Iniciar el desarrollo
 ```bash
 # En una terminal (backend)
 cd backend
@@ -170,6 +185,41 @@ npm run dev
 - `POST /api/workouts` - Crear nuevo entrenamiento
 - `PUT /api/workouts/:id` - Actualizar entrenamiento
 - `DELETE /api/workouts/:id` - Eliminar entrenamiento
+
+## Base de Datos
+
+### Estructura de Tablas en PostgreSQL (gestionado por Prisma)
+
+#### users
+- `id` (UUID, PK) - Identificador único del usuario
+- `email` (VARCHAR, UNIQUE) - Correo electrónico
+- `password` (VARCHAR) - Contraseña encriptada
+- `name` (VARCHAR) - Nombre del usuario
+- `weight` (DECIMAL) - Peso del usuario
+- `height` (DECIMAL) - Altura del usuario
+- `measurements` (JSONB) - Medidas corporales
+- `created_at` (TIMESTAMP) - Fecha de creación
+- `updated_at` (TIMESTAMP) - Fecha de actualización
+
+#### workouts
+- `id` (UUID, PK) - Identificador único del entrenamiento
+- `user_id` (UUID, FK) - Referencia al usuario
+- `title` (VARCHAR) - Título del entrenamiento
+- `exercises` (JSONB) - Array de ejercicios
+- `notes` (TEXT) - Notas adicionales
+- `completed` (BOOLEAN) - Estado de completitud
+- `created_at` (TIMESTAMP) - Fecha de creación
+- `updated_at` (TIMESTAMP) - Fecha de actualización
+
+#### progress
+- `id` (UUID, PK) - Identificador único del registro de progreso
+- `user_id` (UUID, FK) - Referencia al usuario
+- `date` (TIMESTAMP) - Fecha del registro
+- `weight` (DECIMAL) - Peso registrado
+- `measurements` (JSONB) - Medidas corporales
+- `notes` (TEXT) - Notas adicionales
+- `created_at` (TIMESTAMP) - Fecha de creación
+- `updated_at` (TIMESTAMP) - Fecha de actualización
 
 ## Contribución
 

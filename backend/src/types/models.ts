@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Decimal } from '@prisma/client/runtime/library';
 
 export interface IMeasurements {
   chest?: number;
@@ -8,45 +8,49 @@ export interface IMeasurements {
   thighs?: number;
 }
 
-export interface IUser extends Document {
+export interface IUser {
+  id: string;
   name: string;
   email: string;
   password: string;
-  weight?: number;
-  height?: number;
+  weight?: Decimal | string;
+  height?: Decimal | string;
   measurements?: IMeasurements;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface IExercise {
+  id?: string;
   name: string;
   sets: number;
   reps: string;
   weight?: number;
   rest?: string;
-  muscleGroups?: string[];
+  muscle_groups?: string[];
   focus?: string;
   completed: boolean;
   day: string;
 }
 
-export interface IWorkout extends Document {
-  user: string;
+export interface IWorkout {
+  id: string;
+  user_id: string;
   title: string;
   exercises: IExercise[];
   notes?: string;
   completed: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface IProgress extends Document {
-  user: string;
-  date: Date;
-  weight: number;
+export interface IProgress {
+  id: string;
+  user_id: string;
+  date: string;
+  weight: Decimal | string;
   measurements?: IMeasurements;
   notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at?: string;
+  updated_at?: string;
 } 

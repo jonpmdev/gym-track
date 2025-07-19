@@ -1,45 +1,65 @@
-import mongoose, { Schema } from 'mongoose';
+import supabase from '../config/supabase';
 import { IUser } from '../types/models';
 
-const userSchema = new Schema<IUser>(
-  {
-    name: {
-      type: String,
-      required: false,
-      trim: true,
-      default: '',
-    },
-    email: {
-      type: String,
-      required: [true, 'El email es obligatorio'],
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    password: {
-      type: String,
-      required: [true, 'La contraseña es obligatoria'],
-      minlength: 6,
-    },
-    weight: {
-      type: Number,
-      default: 0,
-    },
-    height: {
-      type: Number,
-      default: 0,
-    },
-    measurements: {
-      chest: { type: Number, default: 0 },
-      waist: { type: Number, default: 0 },
-      hips: { type: Number, default: 0 },
-      biceps: { type: Number, default: 0 },
-      thighs: { type: Number, default: 0 },
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+class UserModel {
+  private tableName = 'users';
 
-export default mongoose.model<IUser>('User', userSchema); 
+  async findByEmail(email: string): Promise<IUser | null> {
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data as IUser;
+  }
+
+  async findById(id: string): Promise<IUser | null> {
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data as IUser;
+  }
+
+  async create(userData: Partial<IUser>): Promise<IUser | null> {
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .insert([userData])
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new Error(`Error al crear usuario: ${error?.message || 'Desconocido'}`);
+    }
+
+    return data as IUser;
+  }
+
+  async update(id: string, userData: Partial<IUser>): Promise<IUser | null> {
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .update(userData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data as IUser;
+  }
+}
+
+export default new UserModel(); 

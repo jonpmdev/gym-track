@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(uuid()) @db.Uuid
+  email        String     @unique @db.VarChar(255)
+  password     String     @db.VarChar(255)
+  name         String?    @default("") @db.VarChar(255)
+  weight       Decimal?   @default(0) @db.Decimal
+  height       Decimal?   @default(0) @db.Decimal
+  measurements Json?      @default("{\"hips\": 0, \"chest\": 0, \"waist\": 0, \"biceps\": 0, \"thighs\": 0}")
+  created_at   DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at   DateTime?  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  progress     Progress[]
+  workouts     Workout[]
+
+  @@map("users")
+}
+
+model Workout {
+  id         String    @id @default(uuid()) @db.Uuid
+  user_id    String    @db.Uuid
+  title      String    @db.VarChar(255)
+  exercises  Json
+  notes      String?   @default("")
+  completed  Boolean?  @default(false)
+  created_at DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_workouts_user_id")
+  @@map("workouts")
+}
+
+model Progress {
+  id           String    @id @default(uuid()) @db.Uuid
+  user_id      String    @db.Uuid
+  date         DateTime? @default(now()) @db.Timestamptz(6)
+  weight       Decimal   @db.Decimal
+  measurements Json?     @default("{\"hips\": 0, \"chest\": 0, \"waist\": 0, \"biceps\": 0, \"thighs\": 0}")
+  notes        String?   @default("")
+  created_at   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([date], map: "idx_progress_date")
+  @@index([user_id], map: "idx_progress_user_id")
+  @@map("progress")
+}

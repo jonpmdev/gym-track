@@ -34,6 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      console.log('Verificando autenticación con token:', token.substring(0, 20) + '...');
+
       const response = await fetch('http://localhost:5000/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -42,11 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData);
+        console.log('Usuario autenticado:', userData.user);
+        setUser(userData.user);
       } else {
+        console.error('Error al verificar autenticación:', await response.text());
         Cookies.remove('token');
       }
     } catch (error) {
+      console.error('Error en checkAuth:', error);
       Cookies.remove('token');
     } finally {
       setLoading(false);
@@ -54,43 +59,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message || 'Error al iniciar sesión');
+      if (!res.ok) {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
+
+      console.log('Login exitoso, token recibido:', data.token.substring(0, 20) + '...');
+      Cookies.set('token', data.token, { expires: 7 }); // Expira en 7 días
+      setUser(data.user);
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error('Error en login:', error);
+      throw error;
     }
-
-    Cookies.set('token', data.token, { expires: 7 }); // Expira en 7 días
-    setUser(data.user);
-    router.push('/dashboard');
   };
 
   const register = async (email: string, password: string) => {
-    const res = await fetch('http://localhost:5000/api/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message || 'Error al registrar usuario');
+      if (!res.ok) {
+        throw new Error(data.message || 'Error al registrar usuario');
+      }
+
+      console.log('Registro exitoso, token recibido:', data.token.substring(0, 20) + '...');
+      Cookies.set('token', data.token, { expires: 7 }); // Expira en 7 días
+      setUser(data.user);
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error('Error en registro:', error);
+      throw error;
     }
-
-    Cookies.set('token', data.token, { expires: 7 }); // Expira en 7 días
-    setUser(data.user);
-    router.push('/dashboard');
   };
 
   const logout = () => {

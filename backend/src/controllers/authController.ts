@@ -1,108 +1,126 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { validationResult } from 'express-validator';
-import User from '../models/userModel';
+import { v4 as uuidv4 } from 'uuid';
 import config from '../config/config';
+import userModel from '../models/userModel.prisma'; // Cambiado a la versión de Prisma
 import { IUser } from '../types/models';
 
+// Extender la interfaz Request para incluir el usuario autenticado
 interface AuthRequest extends Request {
-  user?: IUser;
+  user?: {
+    id: string;
+  };
 }
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    const { name, email, password } = req.body;
 
-    const { email, password } = req.body;
-
-    // Verificar si el email ya existe
-    let existingUser = await User.findOne({ email });
+    // Verificar si el usuario ya existe
+    const existingUser = await userModel.findByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ 
-        message: 'Ya existe una cuenta con este email',
-        field: 'email'
-      });
+      return res.status(400).json({ message: 'El correo electrónico ya está registrado' });
     }
 
+    // Encriptar contraseña
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Crear usuario sin nombre
-    const user = await User.create({
+    // Crear usuario
+    const newUser = await userModel.create({
+      id: uuidv4(),
+      name,
       email,
-      password: hashedPassword,
+      password: hashedPassword
     });
 
+    // Generar token JWT
     const token = jwt.sign(
-      { id: user._id },
+      { id: newUser.id },
       config.JWT_SECRET,
       { expiresIn: config.JWT_EXPIRES_IN } as jwt.SignOptions
     );
 
+    // Responder con el usuario creado (sin la contraseña)
+    const { password: _, ...userWithoutPassword } = newUser as IUser;
+    
     res.status(201).json({
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-      },
+      message: 'Usuario registrado exitosamente',
+      user: userWithoutPassword,
+      token
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error en el servidor' });
+  } catch (error: any) {
+    console.error('Error en registro:', error);
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 };
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // Buscar usuario por email
+    const user = await userModel.findByEmail(email);
     if (!user) {
-      return res.status(400).json({ message: 'Credenciales inválidas' });
+      return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Credenciales inválidas' });
+    // Verificar contraseña
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
+    // Generar token JWT
     const token = jwt.sign(
-      { id: user._id },
+      { id: user.id },
       config.JWT_SECRET,
       { expiresIn: config.JWT_EXPIRES_IN } as jwt.SignOptions
     );
 
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-      },
+    // Responder con el usuario (sin la contraseña)
+    const { password: _, ...userWithoutPassword } = user;
+    
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso',
+      user: userWithoutPassword,
+      token
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error en el servidor' });
+  } catch (error: any) {
+    console.error('Error en login:', error);
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
-}; 
+};
 
-export const getCurrentUser = async (req: AuthRequest, res: Response) => {
+export const getProfile = async (req: AuthRequest, res: Response) => {
   try {
-    const user = await User.findById(req.user?._id).select('-password');
+    // El middleware de autenticación ya verificó el token y añadió el userId
+    const userId = req.user?.id;
+    
+    console.log('getProfile - ID de usuario:', userId);
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'No autorizado' });
+    }
+
+    // Buscar usuario por ID
+    const user = await userModel.findById(userId);
+    
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
-    res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error en el servidor' });
+
+    // Responder con el usuario (sin la contraseña)
+    const { password: _, ...userWithoutPassword } = user;
+    
+    console.log('getProfile - Usuario encontrado:', userWithoutPassword);
+    
+    res.status(200).json({
+      user: userWithoutPassword
+    });
+  } catch (error: any) {
+    console.error('Error al obtener perfil:', error);
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 }; 

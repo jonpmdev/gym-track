@@ -1,161 +1,118 @@
-import mongoose from 'mongoose';
-import config from '../config/config';
+import supabase from '../config/supabase';
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 async function initializeDatabase() {
   try {
-    // Conectar a MongoDB
-    await mongoose.connect(config.MONGODB_URI);
-    console.log('Conectado a MongoDB');
+    console.log('Inicializando base de datos PostgreSQL en Supabase...');
 
-    // Obtener la conexión de la base de datos
-    const db = mongoose.connection;
+    // Conexión directa a PostgreSQL para ejecutar comandos SQL
+    const pool = new Pool({
+      connectionString: process.env.SUPABASE_POSTGRES_URL,
+      ssl: { rejectUnauthorized: false }
+    });
 
-    // Configuración de validación para cada colección
-    const collectionValidators = {
-      users: {
-        validator: {
-          $jsonSchema: {
-            bsonType: 'object',
-            required: ['email', 'password'],
-            properties: {
-              email: {
-                bsonType: 'string',
-                pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'
-              },
-              password: {
-                bsonType: 'string',
-                minLength: 6
-              },
-              name: {
-                bsonType: 'string'
-              },
-              weight: {
-                bsonType: 'number'
-              },
-              height: {
-                bsonType: 'number'
-              },
-              measurements: {
-                bsonType: 'object',
-                properties: {
-                  chest: { bsonType: 'number' },
-                  waist: { bsonType: 'number' },
-                  hips: { bsonType: 'number' },
-                  biceps: { bsonType: 'number' },
-                  thighs: { bsonType: 'number' }
-                }
-              }
-            }
-          }
-        }
-      },
-      workouts: {
-        validator: {
-          $jsonSchema: {
-            bsonType: 'object',
-            required: ['user', 'title', 'exercises'],
-            properties: {
-              user: {
-                bsonType: ['string', 'objectId']
-              },
-              title: {
-                bsonType: 'string'
-              },
-              exercises: {
-                bsonType: 'array',
-                items: {
-                  bsonType: 'object',
-                  required: ['name', 'sets', 'reps', 'day', 'completed'],
-                  properties: {
-                    name: { bsonType: 'string' },
-                    sets: { bsonType: 'number' },
-                    reps: { bsonType: 'string' },
-                    weight: { bsonType: 'number' },
-                    rest: { bsonType: 'string' },
-                    muscleGroups: {
-                      bsonType: 'array',
-                      items: { bsonType: 'string' }
-                    },
-                    focus: { bsonType: 'string' },
-                    completed: { bsonType: 'bool' },
-                    day: { bsonType: 'string' }
-                  }
-                }
-              },
-              notes: { bsonType: 'string' },
-              completed: { bsonType: 'bool' }
-            }
-          }
-        }
-      },
-      progress: {
-        validator: {
-          $jsonSchema: {
-            bsonType: 'object',
-            required: ['user', 'date', 'weight'],
-            properties: {
-              user: {
-                bsonType: ['string', 'objectId']
-              },
-              date: {
-                bsonType: 'date'
-              },
-              weight: {
-                bsonType: 'number'
-              },
-              measurements: {
-                bsonType: 'object',
-                properties: {
-                  chest: { bsonType: 'number' },
-                  waist: { bsonType: 'number' },
-                  hips: { bsonType: 'number' },
-                  biceps: { bsonType: 'number' },
-                  thighs: { bsonType: 'number' }
-                }
-              },
-              notes: { bsonType: 'string' }
-            }
-          }
-        }
-      }
-    };
+    const client = await pool.connect();
+    
+    try {
+      // Crear tabla de usuarios
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id UUID PRIMARY KEY,
+          email VARCHAR(255) NOT NULL UNIQUE,
+          password VARCHAR(255) NOT NULL,
+          name VARCHAR(255) DEFAULT '',
+          weight NUMERIC DEFAULT 0,
+          height NUMERIC DEFAULT 0,
+          measurements JSONB DEFAULT '{"chest": 0, "waist": 0, "hips": 0, "biceps": 0, "thighs": 0}',
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log('Tabla users creada o ya existente');
 
-    // Actualizar o crear colecciones con sus validaciones
-    for (const [collectionName, validation] of Object.entries(collectionValidators)) {
-      try {
-        // Intentar obtener la colección existente
-        const collections = await db.db.listCollections({ name: collectionName }).toArray();
-        
-        if (collections.length > 0) {
-          // Si la colección existe, actualizar su validación
-          await db.db.command({
-            collMod: collectionName,
-            ...validation
-          });
-          console.log(`Colección ${collectionName} actualizada con nueva validación`);
-        } else {
-          // Si la colección no existe, crearla
-          await db.createCollection(collectionName, validation);
-          console.log(`Colección ${collectionName} creada con validación`);
-        }
-      } catch (error) {
-        console.error(`Error al procesar la colección ${collectionName}:`, error);
-        throw error;
-      }
+      // Crear tabla de entrenamientos
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS workouts (
+          id UUID PRIMARY KEY,
+          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          title VARCHAR(255) NOT NULL,
+          exercises JSONB NOT NULL,
+          notes TEXT DEFAULT '',
+          completed BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log('Tabla workouts creada o ya existente');
+
+      // Crear tabla de progreso
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS progress (
+          id UUID PRIMARY KEY,
+          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          weight NUMERIC NOT NULL,
+          measurements JSONB DEFAULT '{"chest": 0, "waist": 0, "hips": 0, "biceps": 0, "thighs": 0}',
+          notes TEXT DEFAULT '',
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log('Tabla progress creada o ya existente');
+
+      // Crear índices para mejorar el rendimiento
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_workouts_user_id ON workouts(user_id);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_progress_user_id ON progress(user_id);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_progress_date ON progress(date);`);
+      console.log('Índices creados o ya existentes');
+
+      // Crear funciones para actualizar automáticamente updated_at
+      await client.query(`
+        CREATE OR REPLACE FUNCTION update_updated_at_column()
+        RETURNS TRIGGER AS $$
+        BEGIN
+          NEW.updated_at = CURRENT_TIMESTAMP;
+          RETURN NEW;
+        END;
+        $$ language 'plpgsql';
+      `);
+      console.log('Función update_updated_at_column creada');
+
+      // Crear triggers para actualizar automáticamente updated_at
+      await client.query(`
+        DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+        CREATE TRIGGER update_users_updated_at
+        BEFORE UPDATE ON users
+        FOR EACH ROW
+        EXECUTE FUNCTION update_updated_at_column();
+      `);
+
+      await client.query(`
+        DROP TRIGGER IF EXISTS update_workouts_updated_at ON workouts;
+        CREATE TRIGGER update_workouts_updated_at
+        BEFORE UPDATE ON workouts
+        FOR EACH ROW
+        EXECUTE FUNCTION update_updated_at_column();
+      `);
+
+      await client.query(`
+        DROP TRIGGER IF EXISTS update_progress_updated_at ON progress;
+        CREATE TRIGGER update_progress_updated_at
+        BEFORE UPDATE ON progress
+        FOR EACH ROW
+        EXECUTE FUNCTION update_updated_at_column();
+      `);
+      console.log('Triggers para updated_at creados');
+
+      console.log('Base de datos inicializada correctamente');
+    } finally {
+      client.release();
     }
 
-    // Crear o actualizar índices
-    await db.collection('users').createIndex({ email: 1 }, { unique: true });
-    console.log('Índice único creado/actualizado para users.email');
-
-    await db.collection('workouts').createIndex({ user: 1 });
-    console.log('Índices creados/actualizados para workouts');
-
-    await db.collection('progress').createIndex({ user: 1 });
-    await db.collection('progress').createIndex({ date: 1 });
-    console.log('Índices creados/actualizados para progress');
-
-    console.log('Todas las colecciones e índices han sido actualizados correctamente');
+    await pool.end();
     process.exit(0);
   } catch (error) {
     console.error('Error al inicializar la base de datos:', error);
