@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import WorkoutForm from '@/components/WorkoutForm';
 import { Workout } from '@/types';
 import './workouts.css';
+import Cookies from 'js-cookie';
 
 export default function WorkoutsPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function WorkoutsPage() {
 
   const fetchWorkouts = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       const res = await fetch('http://localhost:5000/api/workouts', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -56,7 +57,7 @@ export default function WorkoutsPage() {
   const fetchSingleWorkout = async (id: string) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       const res = await fetch(`http://localhost:5000/api/workouts/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -80,18 +81,43 @@ export default function WorkoutsPage() {
   const handleCreateWorkout = async (workoutData: Omit<Workout, 'id' | 'completed'>) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
+      
+      if (!token) {
+        throw new Error('No estás autenticado. Por favor, inicia sesión nuevamente.');
+      }
+      
+      // Asegurar que los datos tienen los tipos correctos antes de enviarlos
+      const validatedWorkoutData = {
+        title: String(workoutData.title),
+        exercises: workoutData.exercises.map(exercise => ({
+          name: String(exercise.name),
+          sets: Number(exercise.sets),
+          reps: String(exercise.reps),
+          weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
+          rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
+          muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
+          focus: exercise.focus !== undefined ? String(exercise.focus) : '',
+          completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
+          day: String(exercise.day)
+        })),
+        notes: workoutData.notes ? String(workoutData.notes) : '',
+      };
+      
+      console.log('Enviando datos de entrenamiento:', validatedWorkoutData);
+      
       const res = await fetch('http://localhost:5000/api/workouts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(workoutData),
+        body: JSON.stringify(validatedWorkoutData),
       });
 
+      const data = await res.json();
+      
       if (!res.ok) {
-        const data = await res.json();
         if (data.errors) {
           // Si hay errores de validación, mostrarlos
           const errorMessages = data.errors.map((err: any) => err.msg).join(', ');
@@ -100,13 +126,16 @@ export default function WorkoutsPage() {
         throw new Error(data.message || 'Error al crear el entrenamiento');
       }
 
+      console.log('Entrenamiento creado con éxito:', data);
+      
+      // Actualizar la lista de entrenamientos y redireccionar
       await fetchWorkouts();
       setShowForm(false);
-      // Limpiar parámetros de URL
       router.push('/workouts');
     } catch (err: any) {
       setError(err.message);
       console.error('Error al crear el entrenamiento:', err);
+      alert(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -117,14 +146,32 @@ export default function WorkoutsPage() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
+      
+      // Asegurar que los datos tienen los tipos correctos antes de enviarlos
+      const validatedWorkoutData = {
+        title: String(workoutData.title),
+        exercises: workoutData.exercises.map(exercise => ({
+          name: String(exercise.name),
+          sets: Number(exercise.sets),
+          reps: String(exercise.reps),
+          weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
+          rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
+          muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
+          focus: exercise.focus !== undefined ? String(exercise.focus) : '',
+          completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
+          day: String(exercise.day)
+        })),
+        notes: workoutData.notes ? String(workoutData.notes) : '',
+      };
+      
       const res = await fetch(`http://localhost:5000/api/workouts/${editWorkout.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(workoutData),
+        body: JSON.stringify(validatedWorkoutData),
       });
 
       if (!res.ok) {
@@ -137,10 +184,10 @@ export default function WorkoutsPage() {
         throw new Error(data.message || 'Error al actualizar el entrenamiento');
       }
 
+      // Actualizar la lista de entrenamientos y redireccionar
       await fetchWorkouts();
       setEditWorkout(null);
       setShowForm(false);
-      // Limpiar parámetros de URL
       router.push('/workouts');
     } catch (err: any) {
       setError(err.message);
@@ -157,7 +204,7 @@ export default function WorkoutsPage() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       const res = await fetch(`http://localhost:5000/api/workouts/${id}`, {
         method: 'DELETE',
         headers: {
@@ -180,7 +227,7 @@ export default function WorkoutsPage() {
   const handleToggleComplete = async (workout: Workout) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       const res = await fetch(`http://localhost:5000/api/workouts/${workout.id}`, {
         method: 'PUT',
         headers: {

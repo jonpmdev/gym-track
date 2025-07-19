@@ -56,7 +56,7 @@ async function initializeDatabase() {
             required: ['user', 'title', 'exercises'],
             properties: {
               user: {
-                bsonType: 'string'
+                bsonType: ['string', 'objectId']
               },
               title: {
                 bsonType: 'string'
@@ -95,7 +95,7 @@ async function initializeDatabase() {
             required: ['user', 'date', 'weight'],
             properties: {
               user: {
-                bsonType: 'string'
+                bsonType: ['string', 'objectId']
               },
               date: {
                 bsonType: 'date'

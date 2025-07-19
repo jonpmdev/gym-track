@@ -181,22 +181,24 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
     }
     
     // Asegurarse de que todos los ejercicios tengan el campo completed
+    // y que los tipos de datos sean correctos
     const validatedExercises = exercises.map(exercise => ({
-      ...exercise,
-      completed: exercise.completed !== undefined ? exercise.completed : false
+      name: String(exercise.name),
+      sets: Number(exercise.sets),
+      reps: String(exercise.reps),
+      weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
+      rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
+      muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
+      focus: exercise.focus !== undefined ? String(exercise.focus) : '',
+      completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
+      day: String(exercise.day)
     }));
     
-    // Depuración: mostrar los datos que se van a enviar
-    console.log('Datos del entrenamiento a enviar:', {
-      title,
-      exercises: validatedExercises,
-      notes
-    });
-    
+    // Enviar los datos del entrenamiento
     onSubmit({
-      title,
+      title: String(title),
       exercises: validatedExercises,
-      notes,
+      notes: notes ? String(notes) : '',
     });
   };
 
@@ -306,135 +308,135 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
               {editMode ? 'Editar ejercicio' : 'Añadir nuevo ejercicio'}
             </h5>
             
-            <div className="form-group">
-              <label htmlFor="exerciseName" className="form-label">
-                Nombre del ejercicio *
-              </label>
-              <input
-                type="text"
-                id="exerciseName"
-                value={currentExercise.name}
-                onChange={(e) => handleExerciseChange('name', e.target.value)}
-                required
-                className="form-input"
-                placeholder="Ej: Press de banca"
-              />
-            </div>
-            
-            <div className="form-row">
-              <div className="form-group w-1/3">
-                <label htmlFor="sets" className="form-label">
-                  Series *
-                </label>
-                <input
-                  type="number"
-                  id="sets"
-                  min="1"
-                  value={currentExercise.sets}
-                  onChange={(e) => handleExerciseChange('sets', parseInt(e.target.value) || 1)}
-                  required
-                  className="form-input"
-                />
-              </div>
-              
-              <div className="form-group w-1/3">
-                <label htmlFor="reps" className="form-label">
-                  Repeticiones *
+            {/* Uso un div en lugar de form para evitar conflictos con el formulario principal */}
+            <div className="exercise-form">
+              <div className="form-group">
+                <label htmlFor="exerciseName" className="form-label">
+                  Nombre del ejercicio *
                 </label>
                 <input
                   type="text"
-                  id="reps"
-                  value={currentExercise.reps}
-                  onChange={(e) => handleExerciseChange('reps', e.target.value)}
-                  required
+                  id="exerciseName"
+                  value={currentExercise.name}
+                  onChange={(e) => handleExerciseChange('name', e.target.value)}
                   className="form-input"
-                  placeholder="Ej: 10 o 5-8"
+                  placeholder="Ej: Press de banca"
                 />
               </div>
               
-              <div className="form-group w-1/3">
-                <label htmlFor="weight" className="form-label">
-                  Peso (kg)
+              <div className="form-row">
+                <div className="form-group w-1/3">
+                  <label htmlFor="sets" className="form-label">
+                    Series *
+                  </label>
+                  <input
+                    type="number"
+                    id="sets"
+                    min="1"
+                    value={currentExercise.sets}
+                    onChange={(e) => handleExerciseChange('sets', parseInt(e.target.value) || 1)}
+                    className="form-input"
+                  />
+                </div>
+                
+                <div className="form-group w-1/3">
+                  <label htmlFor="reps" className="form-label">
+                    Repeticiones *
+                  </label>
+                  <input
+                    type="text"
+                    id="reps"
+                    value={currentExercise.reps}
+                    onChange={(e) => handleExerciseChange('reps', e.target.value)}
+                    className="form-input"
+                    placeholder="Ej: 10 o 5-8"
+                  />
+                </div>
+                
+                <div className="form-group w-1/3">
+                  <label htmlFor="weight" className="form-label">
+                    Peso (kg)
+                  </label>
+                  <input
+                    type="number"
+                    id="weight"
+                    min="0"
+                    step="0.5"
+                    value={currentExercise.weight}
+                    onChange={(e) => handleExerciseChange('weight', parseFloat(e.target.value) || 0)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="rest" className="form-label">
+                  Descanso (segundos)
                 </label>
                 <input
-                  type="number"
-                  id="weight"
-                  min="0"
-                  step="0.5"
-                  value={currentExercise.weight}
-                  onChange={(e) => handleExerciseChange('weight', parseFloat(e.target.value) || 0)}
+                  type="text"
+                  id="rest"
+                  value={currentExercise.rest}
+                  onChange={(e) => handleExerciseChange('rest', e.target.value)}
                   className="form-input"
+                  placeholder="Ej: 60 o 90-120"
                 />
               </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="rest" className="form-label">
-                Descanso (segundos)
-              </label>
-              <input
-                type="text"
-                id="rest"
-                value={currentExercise.rest}
-                onChange={(e) => handleExerciseChange('rest', e.target.value)}
-                className="form-input"
-                placeholder="Ej: 60 o 90-120"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">
-                Grupos musculares
-              </label>
-              <div className="checkbox-group">
-                {MUSCLE_GROUPS.map((group) => (
-                  <div 
-                    key={group} 
-                    className={`checkbox-item ${currentExercise.muscleGroups?.includes(group) ? 'selected' : ''}`}
-                    onClick={() => handleMuscleGroupToggle(group)}
-                  >
-                    {group}
-                  </div>
-                ))}
+              
+              <div className="form-group">
+                <label className="form-label">
+                  Grupos musculares
+                </label>
+                <div className="checkbox-group">
+                  {MUSCLE_GROUPS.map((group) => (
+                    <div 
+                      key={group} 
+                      className={`checkbox-item ${currentExercise.muscleGroups?.includes(group) ? 'selected' : ''}`}
+                      onClick={() => handleMuscleGroupToggle(group)}
+                    >
+                      {group}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="focus" className="form-label">
-                Enfoque
-              </label>
-              <select
-                id="focus"
-                value={currentExercise.focus}
-                onChange={(e) => handleExerciseChange('focus', e.target.value)}
-                className="form-select"
-              >
-                <option value="">Seleccionar</option>
-                {FOCUS_TYPES.map((focus) => (
-                  <option key={focus} value={focus}>
-                    {focus}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="flex justify-end space-x-2 mt-4">
-              {editMode && (
+              
+              <div className="form-group">
+                <label htmlFor="focus" className="form-label">
+                  Enfoque
+                </label>
+                <select
+                  id="focus"
+                  value={currentExercise.focus}
+                  onChange={(e) => handleExerciseChange('focus', e.target.value)}
+                  className="form-select"
+                >
+                  <option value="">Seleccionar</option>
+                  {FOCUS_TYPES.map((focus) => (
+                    <option key={focus} value={focus}>
+                      {focus}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex justify-end space-x-2 mt-4">
+                {editMode && (
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="form-button secondary-button"
+                  >
+                    Cancelar
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={cancelEdit}
-                  className="form-button secondary-button"
+                  onClick={addExercise}
+                  className="add-exercise-button"
                 >
-                  Cancelar
+                  {editMode ? 'Actualizar ejercicio' : 'Añadir ejercicio'}
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={addExercise}
-                className="add-exercise-button"
-              >
-                {editMode ? 'Actualizar ejercicio' : 'Añadir ejercicio'}
-              </button>
+              </div>
             </div>
           </div>
         </div>

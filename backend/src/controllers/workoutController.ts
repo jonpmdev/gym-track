@@ -40,17 +40,66 @@ export const getWorkout = async (req: AuthRequest, res: Response) => {
 // Crear un nuevo entrenamiento
 export const createWorkout = async (req: AuthRequest, res: Response) => {
   try {
-    // Asegurarse de que cada ejercicio tenga el campo completed
-    const exercises = req.body.exercises.map((exercise: any) => ({
-      ...exercise,
-      completed: exercise.completed !== undefined ? exercise.completed : false
-    }));
+    // Verificar que el usuario esté autenticado
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
 
-    const workout = new Workout({
-      ...req.body,
-      exercises,
-      user: req.user?._id,
-    });
+    // Verificar que se proporcionen los campos requeridos
+    if (!req.body.title) {
+      return res.status(400).json({ message: 'El título del entrenamiento es obligatorio' });
+    }
+
+    if (!req.body.exercises || !Array.isArray(req.body.exercises) || req.body.exercises.length === 0) {
+      return res.status(400).json({ message: 'Debe incluir al menos un ejercicio' });
+    }
+
+    // Validar cada ejercicio
+    const validatedExercises = [];
+    for (const exercise of req.body.exercises) {
+      if (!exercise.name || exercise.sets === undefined || !exercise.reps || !exercise.day) {
+        return res.status(400).json({ 
+          message: 'Cada ejercicio debe incluir nombre, series, repeticiones y día' 
+        });
+      }
+
+      // Asegurar que los tipos de datos sean correctos según la validación del esquema
+      const validatedExercise = {
+        name: String(exercise.name),
+        sets: Number(exercise.sets),
+        reps: String(exercise.reps),
+        weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
+        rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
+        muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
+        focus: exercise.focus !== undefined ? String(exercise.focus) : '',
+        completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
+        day: String(exercise.day)
+      };
+
+      validatedExercises.push(validatedExercise);
+    }
+
+    // Crear el objeto de entrenamiento
+    const workoutData = {
+      title: String(req.body.title),
+      exercises: validatedExercises,
+      notes: req.body.notes ? String(req.body.notes) : '',
+      completed: false,
+      user: req.user._id,
+    };
+
+    // Crear y guardar el entrenamiento
+    const workout = new Workout(workoutData);
+
+    try {
+      await workout.validate();
+    } catch (validationError) {
+      console.error('Error de validación:', validationError);
+      return res.status(400).json({ 
+        message: 'Error de validación en los datos del entrenamiento',
+        error: validationError
+      });
+    }
 
     await workout.save();
     res.status(201).json(workout);
@@ -67,11 +116,53 @@ export const createWorkout = async (req: AuthRequest, res: Response) => {
 export const updateWorkout = async (req: AuthRequest, res: Response) => {
   try {
     // Si se actualizan ejercicios, asegurarse de que cada uno tenga el campo completed
+    // y que los tipos de datos sean correctos
     if (req.body.exercises) {
+      // Validar que todos los ejercicios tengan los campos requeridos
+      for (const exercise of req.body.exercises) {
+        if (!exercise.name || exercise.sets === undefined || !exercise.reps || !exercise.day) {
+          return res.status(400).json({ 
+            message: 'Cada ejercicio debe incluir nombre, series, repeticiones y día' 
+          });
+        }
+      }
+
       req.body.exercises = req.body.exercises.map((exercise: any) => ({
-        ...exercise,
-        completed: exercise.completed !== undefined ? exercise.completed : false
+        name: String(exercise.name),
+        sets: Number(exercise.sets),
+        reps: String(exercise.reps),
+        weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
+        rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
+        muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
+        focus: exercise.focus !== undefined ? String(exercise.focus) : '',
+        completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
+        day: String(exercise.day)
       }));
+    }
+
+    // Preparar los datos para la actualización
+    const updateData = { ...req.body };
+    if (updateData.title) {
+      updateData.title = String(updateData.title);
+    }
+    if (updateData.notes !== undefined) {
+      updateData.notes = String(updateData.notes);
+    }
+    if (updateData.completed !== undefined) {
+      updateData.completed = Boolean(updateData.completed);
+    }
+
+    // Validar los datos antes de actualizar
+    const tempWorkout = new Workout(updateData);
+    try {
+      // Validar solo los campos que se están actualizando
+      await tempWorkout.validate();
+    } catch (validationError) {
+      console.error('Error de validación:', validationError);
+      return res.status(400).json({ 
+        message: 'Error de validación en los datos del entrenamiento',
+        error: validationError
+      });
     }
 
     const workout = await Workout.findOneAndUpdate(
@@ -79,8 +170,8 @@ export const updateWorkout = async (req: AuthRequest, res: Response) => {
         _id: req.params.id,
         user: req.user?._id,
       },
-      req.body,
-      { new: true }
+      updateData,
+      { new: true, runValidators: true }
     );
 
     if (!workout) {
