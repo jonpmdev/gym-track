@@ -240,7 +240,7 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
                 className={`day-tab ${activeDay === day ? 'active' : ''}`}
                 onClick={() => setActiveDay(day)}
               >
-                {day}
+                {day} {getExercisesByDay(day).length > 0 && <span className="exercise-count">({getExercisesByDay(day).length})</span>}
               </div>
             ))}
           </div>
@@ -279,14 +279,14 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
                         <button
                           type="button"
                           onClick={() => editExercise(exerciseIndex)}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="workout-action-button view"
                         >
                           Editar
                         </button>
                         <button
                           type="button"
                           onClick={() => removeExercise(exerciseIndex)}
-                          className="text-red-600 hover:text-red-800"
+                          className="workout-action-button delete"
                         >
                           Eliminar
                         </button>

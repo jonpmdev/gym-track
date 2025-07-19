@@ -192,6 +192,9 @@
 .exercise-actions {
   display: flex;
   gap: 0.5rem;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 0.5rem;
 }
 
 .exercise-actions button {
@@ -201,6 +204,8 @@
   transition: all 0.2s ease;
   font-weight: 500;
   white-space: nowrap;
+  flex: 1;
+  text-align: center;
 }
 
 /* Botones de editar y eliminar */
@@ -212,30 +217,62 @@
   font-weight: 500;
 }
 
-.exercise-card button.text-blue-600 {
+/* Estilos para los botones de acción */
+.workout-action-button {
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: none;
+  background-color: transparent;
+}
+
+.workout-action-button.view {
   color: #2563eb;
   background-color: rgba(37, 99, 235, 0.1);
   border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
-.exercise-card button.text-blue-600:hover {
+.workout-action-button.view:hover {
   background-color: rgba(37, 99, 235, 0.2);
   color: #1d4ed8;
 }
 
-.exercise-card button.text-red-600 {
+.workout-action-button.complete {
+  color: #059669;
+  background-color: rgba(5, 150, 105, 0.1);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.workout-action-button.complete:hover {
+  background-color: rgba(5, 150, 105, 0.2);
+  color: #047857;
+}
+
+.workout-action-button.incomplete {
+  color: #d97706;
+  background-color: rgba(217, 119, 6, 0.1);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.workout-action-button.incomplete:hover {
+  background-color: rgba(217, 119, 6, 0.2);
+  color: #b45309;
+}
+
+.workout-action-button.delete {
   color: #dc2626;
   background-color: rgba(220, 38, 38, 0.1);
   border: 1px solid rgba(220, 38, 38, 0.2);
-  margin-left: 0.5rem;
 }
 
-.exercise-card button.text-red-600:hover {
+.workout-action-button.delete:hover {
   background-color: rgba(220, 38, 38, 0.2);
   color: #b91c1c;
 }
 
-/* Estilo para los grupos de ejercicios */
 .exercise-card .text-sm {
   font-size: 0.875rem;
 }
@@ -776,4 +813,9 @@
     min-width: auto;
     max-width: 48%;
   }
+} 
+
+.exercise-count {
+  font-size: 0.85em;
+  margin-left: 4px;
 } 

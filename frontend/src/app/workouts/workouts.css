@@ -18,6 +18,56 @@
   gap: 1.5rem;
 }
 
+/* Estilo para el botón "Ver todos" */
+.view-all-button {
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background-color: rgba(37, 99, 235, 0.15);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  color: #2563eb;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+  margin: 0.5rem;
+}
+
+.view-all-button:hover {
+  background-color: rgba(37, 99, 235, 0.25);
+  color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(37, 99, 235, 0.2);
+}
+
+.view-all-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Añadir efecto de brillo al pasar el cursor */
+.view-all-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(30deg);
+  transition: transform 0.6s ease;
+}
+
+.view-all-button:hover::after {
+  transform: rotate(30deg) translateX(300%);
+}
+
 .workout-card {
   background: white;
   border-radius: 10px;
@@ -131,38 +181,56 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  flex: 1;
+  text-align: center;
 }
 
 .workout-action-button.view {
   color: #2563eb;
+  background-color: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 .workout-action-button.view:hover {
+  background-color: rgba(37, 99, 235, 0.2);
   color: #1d4ed8;
 }
 
 .workout-action-button.complete {
   color: #059669;
+  background-color: rgba(5, 150, 105, 0.1);
+  border: 1px solid rgba(5, 150, 105, 0.2);
 }
 
 .workout-action-button.complete:hover {
+  background-color: rgba(5, 150, 105, 0.2);
   color: #047857;
 }
 
 .workout-action-button.incomplete {
   color: #d97706;
+  background-color: rgba(217, 119, 6, 0.1);
+  border: 1px solid rgba(217, 119, 6, 0.2);
 }
 
 .workout-action-button.incomplete:hover {
+  background-color: rgba(217, 119, 6, 0.2);
   color: #b45309;
 }
 
 .workout-action-button.delete {
   color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.2);
 }
 
 .workout-action-button.delete:hover {
+  background-color: rgba(220, 38, 38, 0.2);
   color: #b91c1c;
 }
 

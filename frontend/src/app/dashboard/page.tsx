@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Workout } from '@/types';
 import './dashboard.css';
+import { ArrowRightIcon } from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -106,13 +107,14 @@ export default function DashboardPage() {
 
         {/* Sección de entrenamientos recientes */}
         <div className="mt-10">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-6 px-2">
             <h2 className="text-xl font-semibold">Entrenamientos Recientes</h2>
             <button 
-              className="text-blue-600 hover:text-blue-800"
+              className="view-all-button"
               onClick={() => router.push('/workouts')}
             >
               Ver todos
+              <ArrowRightIcon className="h-4 w-4" />
             </button>
           </div>
 
@@ -121,7 +123,7 @@ export default function DashboardPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
             </div>
           ) : recentWorkouts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-2">
               {recentWorkouts.map((workout) => (
                 <div 
                   key={workout.id} 
@@ -129,15 +131,15 @@ export default function DashboardPage() {
                   onClick={() => handleViewWorkout(workout.id)}
                 >
                   <h3 className="font-medium text-gray-900">{workout.title}</h3>
-                  <div className="flex items-center mt-2 mb-2">
-                    <span className="text-sm text-gray-500 mr-2">
+                  <div className="flex items-center mt-3 mb-3">
+                    <span className="text-sm text-gray-500 mr-3">
                       {workout.exercises.length} ejercicios
                     </span>
                     <span className="text-sm text-gray-500">
                       {getExercisesByDay(workout).length} días
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-3">
                     {getExercisesByDay(workout).slice(0, 3).map((day) => (
                       <span key={day} className="recent-workout-day">
                         {day}
@@ -153,13 +155,14 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-              <p className="text-gray-500">No hay entrenamientos recientes</p>
+            <div className="text-center py-10 px-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 m-2">
+              <p className="text-gray-500 mb-3">No hay entrenamientos recientes</p>
               <button 
-                className="mt-2 text-blue-600 hover:text-blue-800"
+                className="view-all-button mt-3"
                 onClick={handleNewWorkout}
               >
                 Crear tu primer entrenamiento
+                <ArrowRightIcon className="h-4 w-4" />
               </button>
             </div>
           )}
