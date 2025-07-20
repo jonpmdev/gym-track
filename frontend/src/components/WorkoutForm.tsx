@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Exercise, Workout } from '@/types';
 import './WorkoutForm.css';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface WorkoutFormProps {
   onSubmit: (workout: Omit<Workout, 'id' | 'completed'>) => void;
@@ -98,7 +100,14 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
   // Función para añadir un nuevo ejercicio
   const addExercise = () => {
     if (!currentExercise.name) {
-      alert('El nombre del ejercicio es obligatorio');
+      toast.error('El nombre del ejercicio es obligatorio', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       return;
     }
 
@@ -109,9 +118,25 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
       setExercises(updatedExercises);
       setEditMode(false);
       setEditIndex(null);
+      toast.success('Ejercicio actualizado correctamente', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } else {
       // Añadir nuevo ejercicio
       setExercises([...exercises, { ...currentExercise, completed: false }]);
+      toast.success('Ejercicio añadido correctamente', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
 
     // Resetear el formulario de ejercicio
@@ -148,6 +173,14 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
   // Función para eliminar un ejercicio
   const removeExercise = (index: number) => {
     setExercises(exercises.filter((_, i) => i !== index));
+    toast.info('Ejercicio eliminado', {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
   };
 
   // Función para cancelar la edición
@@ -171,12 +204,40 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
     e.preventDefault();
     
     if (!title) {
-      alert('El título del entrenamiento es obligatorio');
+      toast.error('El título del entrenamiento es obligatorio', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       return;
     }
     
     if (exercises.length === 0) {
-      alert('Debes añadir al menos un ejercicio');
+      toast.error('Debes añadir al menos un ejercicio', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      return;
+    }
+    
+    // Verificar que cada ejercicio tenga los campos requeridos
+    const invalidExercises = exercises.filter(exercise => !exercise.name || !exercise.sets || !exercise.reps);
+    if (invalidExercises.length > 0) {
+      toast.error('Hay ejercicios con información incompleta', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       return;
     }
     
@@ -189,6 +250,8 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
       weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
       rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
       muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
+      // Añadir campo muscle_groups para compatibilidad con el backend
+      muscle_groups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
       focus: exercise.focus !== undefined ? String(exercise.focus) : '',
       completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
       day: String(exercise.day)
@@ -204,6 +267,19 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
 
   return (
     <form onSubmit={handleSubmit} className="workout-form">
+      <ToastContainer 
+        position="top-center"
+        autoClose={3000} 
+        hideProgressBar={false} 
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        limit={3}
+      />
       <h2 className="workout-form-title">
         {initialData ? 'Editar Entrenamiento' : 'Nuevo Entrenamiento'}
       </h2>

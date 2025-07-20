@@ -25,18 +25,38 @@ model User {
 }
 
 model Workout {
-  id         String    @id @default(uuid()) @db.Uuid
-  user_id    String    @db.Uuid
-  title      String    @db.VarChar(255)
-  exercises  Json
-  notes      String?   @default("")
-  completed  Boolean?  @default(false)
-  created_at DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id         String     @id @default(uuid()) @db.Uuid
+  user_id    String     @db.Uuid
+  title      String     @db.VarChar(255)
+  notes      String?    @default("")
+  completed  Boolean?   @default(false)
+  created_at DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at DateTime?  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  exercises  Exercise[]
 
   @@index([user_id], map: "idx_workouts_user_id")
   @@map("workouts")
+}
+
+model Exercise {
+  id            String   @id @default(uuid()) @db.Uuid
+  workout_id    String   @db.Uuid
+  name          String   @db.VarChar(255)
+  sets          Int      @default(3)
+  reps          String   @db.VarChar(50)
+  weight        Decimal? @default(0) @db.Decimal
+  rest          String?  @db.VarChar(50)
+  muscle_groups String[] @default([])
+  focus         String?  @db.VarChar(100)
+  day           String   @db.VarChar(50)
+  completed     Boolean? @default(false)
+  created_at    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workout       Workout  @relation(fields: [workout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([workout_id], map: "idx_exercises_workout_id")
+  @@map("exercises")
 }
 
 model Progress {

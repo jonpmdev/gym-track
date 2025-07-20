@@ -7,13 +7,14 @@ import WorkoutForm from '@/components/WorkoutForm';
 import { Workout } from '@/types';
 import './workouts.css';
 import Cookies from 'js-cookie';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function WorkoutsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editWorkout, setEditWorkout] = useState<Workout | null>(null);
 
@@ -48,7 +49,11 @@ export default function WorkoutsPage() {
       const data = await res.json();
       setWorkouts(data);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error al obtener los entrenamientos:', err);
+      toast.error(`Error: ${err.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -72,7 +77,11 @@ export default function WorkoutsPage() {
       setEditWorkout(workout);
       setShowForm(true);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error al obtener el entrenamiento:', err);
+      toast.error(`Error: ${err.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -84,28 +93,37 @@ export default function WorkoutsPage() {
       const token = Cookies.get('token');
       
       if (!token) {
+        toast.error('No estás autenticado. Por favor, inicia sesión nuevamente.', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
         throw new Error('No estás autenticado. Por favor, inicia sesión nuevamente.');
       }
       
-      // Asegurar que los datos tienen los tipos correctos antes de enviarlos
+      // Preparar los datos del entrenamiento con los ejercicios incluidos
       const validatedWorkoutData = {
         title: String(workoutData.title),
+        notes: workoutData.notes ? String(workoutData.notes) : '',
         exercises: workoutData.exercises.map(exercise => ({
           name: String(exercise.name),
           sets: Number(exercise.sets),
           reps: String(exercise.reps),
           weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
           rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
-          muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
+          muscle_groups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
           focus: exercise.focus !== undefined ? String(exercise.focus) : '',
           completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
           day: String(exercise.day)
-        })),
-        notes: workoutData.notes ? String(workoutData.notes) : '',
+        }))
       };
       
       console.log('Enviando datos de entrenamiento:', validatedWorkoutData);
       
+      // Crear el entrenamiento con todos los ejercicios en una sola petición
       const res = await fetch('http://localhost:5000/api/workouts', {
         method: 'POST',
         headers: {
@@ -115,27 +133,46 @@ export default function WorkoutsPage() {
         body: JSON.stringify(validatedWorkoutData),
       });
 
-      const data = await res.json();
-      
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.error("Error al parsear la respuesta:", e);
+      }
+
       if (!res.ok) {
-        if (data.errors) {
+        if (data && data.errors) {
           // Si hay errores de validación, mostrarlos
           const errorMessages = data.errors.map((err: any) => err.msg).join(', ');
           throw new Error(`Error al crear el entrenamiento: ${errorMessages}`);
         }
-        throw new Error(data.message || 'Error al crear el entrenamiento');
+        throw new Error((data && data.message) || 'Error al crear el entrenamiento');
       }
-
-      console.log('Entrenamiento creado con éxito:', data);
       
-      // Actualizar la lista de entrenamientos y redireccionar
-      await fetchWorkouts();
-      setShowForm(false);
-      router.push('/workouts');
+      // Mostrar mensaje de éxito
+              toast.success('Entrenamiento creado correctamente', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        
+        // Actualizar la lista de entrenamientos y redireccionar después de mostrar el mensaje
+        await fetchWorkouts();
+        setShowForm(false);
+        router.push('/workouts');
     } catch (err: any) {
-      setError(err.message);
       console.error('Error al crear el entrenamiento:', err);
-      alert(`Error: ${err.message}`);
+      toast.error(`Error: ${err.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -148,23 +185,24 @@ export default function WorkoutsPage() {
       setLoading(true);
       const token = Cookies.get('token');
       
-      // Asegurar que los datos tienen los tipos correctos antes de enviarlos
+      // Preparar los datos del entrenamiento con los ejercicios incluidos
       const validatedWorkoutData = {
         title: String(workoutData.title),
+        notes: workoutData.notes ? String(workoutData.notes) : '',
         exercises: workoutData.exercises.map(exercise => ({
           name: String(exercise.name),
           sets: Number(exercise.sets),
           reps: String(exercise.reps),
           weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
           rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
-          muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
+          muscle_groups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
           focus: exercise.focus !== undefined ? String(exercise.focus) : '',
           completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
           day: String(exercise.day)
-        })),
-        notes: workoutData.notes ? String(workoutData.notes) : '',
+        }))
       };
       
+      // Actualizar el entrenamiento con todos los ejercicios en una sola petición
       const res = await fetch(`http://localhost:5000/api/workouts/${editWorkout.id}`, {
         method: 'PUT',
         headers: {
@@ -174,53 +212,82 @@ export default function WorkoutsPage() {
         body: JSON.stringify(validatedWorkoutData),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        if (data.errors) {
-          // Si hay errores de validación, mostrarlos
-          const errorMessages = data.errors.map((err: any) => err.msg).join(', ');
-          throw new Error(`Error al actualizar el entrenamiento: ${errorMessages}`);
-        }
-        throw new Error(data.message || 'Error al actualizar el entrenamiento');
+      let errorData;
+      try {
+        errorData = await res.json();
+      } catch (e) {
+        console.error("Error al parsear la respuesta:", e);
       }
 
-      // Actualizar la lista de entrenamientos y redireccionar
-      await fetchWorkouts();
-      setEditWorkout(null);
-      setShowForm(false);
-      router.push('/workouts');
+      if (!res.ok) {
+        if (errorData && errorData.errors) {
+          // Si hay errores de validación, mostrarlos
+          const errorMessages = errorData.errors.map((err: any) => err.msg).join(', ');
+          throw new Error(`Error al actualizar el entrenamiento: ${errorMessages}`);
+        }
+        throw new Error((errorData && errorData.message) || 'Error al actualizar el entrenamiento');
+      }
+
+      // Mostrar mensaje de éxito
+              toast.success('Entrenamiento actualizado correctamente', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        
+        // Actualizar la lista de entrenamientos y redireccionar después de mostrar el mensaje
+        await fetchWorkouts();
+        setEditWorkout(null);
+        setShowForm(false);
+        router.push('/workouts');
     } catch (err: any) {
-      setError(err.message);
       console.error('Error al actualizar el entrenamiento:', err);
+      toast.error(`Error: ${err.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteWorkout = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este entrenamiento?')) {
-      return;
-    }
+    if (window.confirm('¿Estás seguro de que quieres eliminar este entrenamiento?')) {
+      try {
+        setLoading(true);
+        const token = Cookies.get('token');
+        const res = await fetch(`http://localhost:5000/api/workouts/${id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    try {
-      setLoading(true);
-      const token = Cookies.get('token');
-      const res = await fetch(`http://localhost:5000/api/workouts/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        if (!res.ok) {
+          throw new Error('Error al eliminar el entrenamiento');
+        }
+
+              await fetchWorkouts();
+      toast.success('Entrenamiento eliminado correctamente', {
+        position: "top-center",
+        autoClose: 2000,
       });
-
-      if (!res.ok) {
-        throw new Error('Error al eliminar el entrenamiento');
-      }
-
-      await fetchWorkouts();
     } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      console.error('Error al eliminar el entrenamiento:', err);
+      toast.error(`Error: ${err.message}`, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -245,7 +312,11 @@ export default function WorkoutsPage() {
 
       await fetchWorkouts();
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error al actualizar el estado del entrenamiento:', err);
+      toast.error(`Error: ${err.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -293,6 +364,19 @@ export default function WorkoutsPage() {
   if (showForm) {
     return (
       <DashboardLayout>
+        <ToastContainer 
+          position="top-center"
+          autoClose={3000} 
+          hideProgressBar={false} 
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          limit={3}
+        />
         <WorkoutForm 
           onSubmit={handleFormSubmit} 
           onCancel={handleFormCancel} 
@@ -304,6 +388,19 @@ export default function WorkoutsPage() {
 
   return (
     <DashboardLayout>
+      <ToastContainer 
+        position="top-center"
+        autoClose={3000} 
+        hideProgressBar={false} 
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        limit={3}
+      />
       <div className="workouts-container">
         <div className="flex justify-between items-center mb-6">
           <h1 className="workouts-title">Mis Entrenamientos</h1>
@@ -314,12 +411,6 @@ export default function WorkoutsPage() {
             Nuevo Entrenamiento
           </button>
         </div>
-
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
 
         <div className="workouts-list">
           {workouts.length === 0 ? (

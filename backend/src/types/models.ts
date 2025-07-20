@@ -21,25 +21,28 @@ export interface IUser {
 }
 
 export interface IExercise {
-  id?: string;
+  id: string;
+  workout_id: string;
   name: string;
   sets: number;
   reps: string;
-  weight?: number;
+  weight?: number | Decimal;
   rest?: string;
   muscle_groups?: string[];
   focus?: string;
-  completed: boolean;
+  completed?: boolean;
   day: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface IWorkout {
   id: string;
   user_id: string;
   title: string;
-  exercises: IExercise[];
+  exercises?: IExercise[];
   notes?: string;
-  completed: boolean;
+  completed?: boolean;
   created_at?: string;
   updated_at?: string;
 }

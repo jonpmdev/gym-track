@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Workout, Exercise } from '@/types';
 import './workout-details.css';
+import Cookies from 'js-cookie';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function WorkoutDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -19,7 +22,7 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
   const fetchWorkout = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       const res = await fetch(`http://localhost:5000/api/workouts/${params.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -34,6 +37,10 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
       setWorkout(data);
     } catch (err: any) {
       setError(err.message);
+      toast.error(`Error: ${err.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -47,35 +54,77 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
       
       // Crear una copia profunda del workout
       const updatedWorkout = JSON.parse(JSON.stringify(workout));
+      const exercise = updatedWorkout.exercises[exerciseIndex];
       
       // Actualizar el estado del ejercicio
-      updatedWorkout.exercises[exerciseIndex].completed = !updatedWorkout.exercises[exerciseIndex].completed;
+      const newCompletedState = !exercise.completed;
+      exercise.completed = newCompletedState;
+      
+      const token = Cookies.get('token');
+      
+      // Usar el nuevo endpoint de ejercicios para actualizar el estado
+      if (exercise.id) {
+        const res = await fetch(`http://localhost:5000/api/exercises/${exercise.id}/completed`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            completed: newCompletedState
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error('Error al actualizar el ejercicio');
+        }
+        
+        toast.success(`Ejercicio ${newCompletedState ? 'completado' : 'marcado como pendiente'}`, {
+          position: "top-center",
+          autoClose: 2000,
+        });
+      }
       
       // Verificar si todos los ejercicios están completados
       const allExercisesCompleted = updatedWorkout.exercises.every((ex: Exercise) => ex.completed);
-      updatedWorkout.completed = allExercisesCompleted;
       
-      const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/workouts/${params.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          exercises: updatedWorkout.exercises,
-          completed: updatedWorkout.completed
-        }),
-      });
+      // Si el estado de completado del workout ha cambiado, actualizarlo
+      if (updatedWorkout.completed !== allExercisesCompleted) {
+        updatedWorkout.completed = allExercisesCompleted;
+        
+        // Actualizar el estado de completado del workout
+        const workoutRes = await fetch(`http://localhost:5000/api/workouts/${params.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            completed: allExercisesCompleted
+          }),
+        });
 
-      if (!res.ok) {
-        throw new Error('Error al actualizar el ejercicio');
+        if (!workoutRes.ok) {
+          throw new Error('Error al actualizar el estado del entrenamiento');
+        }
+        
+        if (allExercisesCompleted) {
+          toast.success('¡Entrenamiento completado!', {
+            position: "top-center",
+            autoClose: 3000,
+            icon: "🎉" as any,
+          });
+        }
       }
 
       // Actualizar el estado local
       setWorkout(updatedWorkout);
     } catch (err: any) {
       setError(err.message);
+      toast.error(`Error: ${err.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -138,6 +187,7 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
 
   return (
     <DashboardLayout>
+      <ToastContainer />
       <div className="workout-details-container">
         <div className="flex justify-between items-center mb-6">
           <div>

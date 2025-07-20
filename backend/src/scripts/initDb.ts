@@ -39,7 +39,6 @@ async function initializeDatabase() {
           id UUID PRIMARY KEY,
           user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           title VARCHAR(255) NOT NULL,
-          exercises JSONB NOT NULL,
           notes TEXT DEFAULT '',
           completed BOOLEAN DEFAULT FALSE,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -47,6 +46,26 @@ async function initializeDatabase() {
         );
       `);
       console.log('Tabla workouts creada o ya existente');
+
+      // Crear tabla de ejercicios
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS exercises (
+          id UUID PRIMARY KEY,
+          workout_id UUID NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
+          name VARCHAR(255) NOT NULL,
+          sets INTEGER DEFAULT 3,
+          reps VARCHAR(50) NOT NULL,
+          weight NUMERIC DEFAULT 0,
+          rest VARCHAR(50),
+          muscle_groups TEXT[] DEFAULT '{}',
+          focus VARCHAR(100),
+          day VARCHAR(50) NOT NULL,
+          completed BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log('Tabla exercises creada o ya existente');
 
       // Crear tabla de progreso
       await client.query(`
@@ -65,6 +84,7 @@ async function initializeDatabase() {
 
       // Crear índices para mejorar el rendimiento
       await client.query(`CREATE INDEX IF NOT EXISTS idx_workouts_user_id ON workouts(user_id);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_exercises_workout_id ON exercises(workout_id);`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_progress_user_id ON progress(user_id);`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_progress_date ON progress(date);`);
       console.log('Índices creados o ya existentes');
@@ -94,6 +114,14 @@ async function initializeDatabase() {
         DROP TRIGGER IF EXISTS update_workouts_updated_at ON workouts;
         CREATE TRIGGER update_workouts_updated_at
         BEFORE UPDATE ON workouts
+        FOR EACH ROW
+        EXECUTE FUNCTION update_updated_at_column();
+      `);
+
+      await client.query(`
+        DROP TRIGGER IF EXISTS update_exercises_updated_at ON exercises;
+        CREATE TRIGGER update_exercises_updated_at
+        BEFORE UPDATE ON exercises
         FOR EACH ROW
         EXECUTE FUNCTION update_updated_at_column();
       `);
