@@ -36,6 +36,7 @@ const ExerciseProgressPage = () => {
   const [exerciseNotes, setExerciseNotes] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     if (!user || !token) {
@@ -45,17 +46,35 @@ const ExerciseProgressPage = () => {
 
     const fetchWorkout = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/workouts/${id}`, {
+        console.log(`Fetching workout with ID: ${id}`);
+        const response = await fetch(`${apiUrl}/api/workouts/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
         if (!response.ok) {
-          throw new Error('No se pudo cargar el entrenamiento');
+          const errorText = await response.text();
+          console.error(`Error response: ${errorText}`);
+          throw new Error(`No se pudo cargar el entrenamiento: ${response.status}`);
         }
 
-        const data = await response.json();
+        const responseData = await response.json();
+        console.log('Workout data received:', responseData);
+        
+        // La API puede devolver el entrenamiento directamente o dentro de un objeto 'workout'
+        const data = responseData.workout || responseData;
+        
+        if (!data) {
+          throw new Error('No se recibieron datos del entrenamiento');
+        }
+        
+        // Verificar si los ejercicios existen y son un array
+        if (!data.exercises || !Array.isArray(data.exercises)) {
+          console.error('Los ejercicios no están presentes o no son un array:', data);
+          data.exercises = [];
+        }
+        
         setWorkout(data);
         
         // Inicializar los pesos con los valores actuales
@@ -69,6 +88,7 @@ const ExerciseProgressPage = () => {
         setExerciseWeights(weights);
         setExerciseNotes(notes);
       } catch (err) {
+        console.error('Error fetching workout:', err);
         setError(err instanceof Error ? err.message : 'Error desconocido');
       } finally {
         setLoading(false);
@@ -76,7 +96,7 @@ const ExerciseProgressPage = () => {
     };
 
     fetchWorkout();
-  }, [id, user, token, router]);
+  }, [id, user, token, router, apiUrl]);
 
   const handleWeightChange = (exerciseId: string, value: string) => {
     const numericValue = parseFloat(value) || 0;
@@ -98,7 +118,10 @@ const ExerciseProgressPage = () => {
     
     setSubmitting(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/exercise-progress`, {
+      console.log(`Submitting progress for exercise ID: ${exerciseId}`);
+      console.log(`Weight: ${exerciseWeights[exerciseId]}, Notes: ${exerciseNotes[exerciseId]}`);
+      
+      const response = await fetch(`${apiUrl}/api/exercise-progress`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,8 +134,18 @@ const ExerciseProgressPage = () => {
         })
       });
 
+      const responseText = await response.text();
+      console.log(`Response status: ${response.status}, Response text: ${responseText}`);
+
       if (!response.ok) {
-        throw new Error('Error al guardar el progreso');
+        let errorMessage = 'Error al guardar el progreso';
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       // Mostrar mensaje de éxito
@@ -129,17 +162,39 @@ const ExerciseProgressPage = () => {
         [exerciseId]: ''
       }));
     } catch (err) {
+      console.error('Error submitting progress:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
+      
+      // Limpiar el mensaje de error después de 3 segundos
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Función para agrupar ejercicios por día
+  const getExercisesByDay = () => {
+    if (!workout || !workout.exercises) return {};
+    
+    return workout.exercises.reduce((acc, exercise) => {
+      if (!acc[exercise.day]) {
+        acc[exercise.day] = [];
+      }
+      acc[exercise.day].push(exercise);
+      return acc;
+    }, {} as Record<string, Exercise[]>);
+  };
+
+  const exercisesByDay = getExercisesByDay();
+  const days = Object.keys(exercisesByDay);
+
   if (loading) {
     return <div className="loading">Cargando...</div>;
   }
 
-  if (error) {
+  if (error && !workout) {
     return <div className="error">{error}</div>;
   }
 
@@ -148,8 +203,8 @@ const ExerciseProgressPage = () => {
   }
 
   return (
-    <div className="exercise-progress-container">
-      <h1>Registrar Progreso: {workout.title}</h1>
+    <div className="workout-details-container">
+      <h1 className="workout-details-title">Registrar Progreso: {workout.title}</h1>
       
       {successMessage && (
         <div className="success-message">
@@ -157,56 +212,75 @@ const ExerciseProgressPage = () => {
         </div>
       )}
       
-      <div className="exercise-list">
-        {workout.exercises.map(exercise => (
-          <div key={exercise.id} className="exercise-card">
-            <h2>{exercise.name}</h2>
-            <div className="exercise-details">
-              <p>Series: {exercise.sets}</p>
-              <p>Repeticiones: {exercise.reps}</p>
-              <p>Peso actual: {exercise.weight || 0} kg</p>
-            </div>
-            
-            <div className="progress-form">
-              <div className="form-group">
-                <label htmlFor={`weight-${exercise.id}`}>Nuevo peso (kg):</label>
-                <input
-                  id={`weight-${exercise.id}`}
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={exerciseWeights[exercise.id] || 0}
-                  onChange={(e) => handleWeightChange(exercise.id, e.target.value)}
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor={`notes-${exercise.id}`}>Notas:</label>
-                <textarea
-                  id={`notes-${exercise.id}`}
-                  value={exerciseNotes[exercise.id] || ''}
-                  onChange={(e) => handleNotesChange(exercise.id, e.target.value)}
-                  placeholder="Añade notas sobre tu progreso..."
-                />
-              </div>
-              
-              <button 
-                className="save-button" 
-                onClick={() => handleSubmit(exercise.id)}
-                disabled={submitting}
-              >
-                {submitting ? 'Guardando...' : 'Guardar Progreso'}
-              </button>
+      {error && (
+        <div className="error">
+          {error}
+        </div>
+      )}
+      
+      <div className="days-tabs">
+        {days.map(day => (
+          <div key={day} className="day-section">
+            <h2 className="day-title">{day}</h2>
+            <div className="exercises-list">
+              {exercisesByDay[day].map(exercise => (
+                <div key={exercise.id} className="exercise-item">
+                  <div className="exercise-content">
+                    <div className="exercise-info">
+                      <h3 className="exercise-name">{exercise.name}</h3>
+                      <div className="exercise-details">
+                        <p>Series: {exercise.sets}</p>
+                        <p>Repeticiones: {exercise.reps}</p>
+                        <p>Peso actual: {exercise.weight || 0} kg</p>
+                      </div>
+                    </div>
+                    
+                    <div className="progress-form">
+                      <div className="form-group">
+                        <label htmlFor={`weight-${exercise.id}`}>Nuevo peso (kg):</label>
+                        <input
+                          id={`weight-${exercise.id}`}
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={exerciseWeights[exercise.id] || 0}
+                          onChange={(e) => handleWeightChange(exercise.id, e.target.value)}
+                          className="form-input"
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor={`notes-${exercise.id}`}>Notas:</label>
+                        <textarea
+                          id={`notes-${exercise.id}`}
+                          value={exerciseNotes[exercise.id] || ''}
+                          onChange={(e) => handleNotesChange(exercise.id, e.target.value)}
+                          placeholder="Añade notas sobre tu progreso..."
+                          className="form-input"
+                        />
+                      </div>
+                      
+                      <button 
+                        className="save-button" 
+                        onClick={() => handleSubmit(exercise.id)}
+                        disabled={submitting}
+                      >
+                        {submitting ? 'Guardando...' : 'Guardar Progreso'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
       </div>
       
       <button 
-        className="back-button" 
-        onClick={() => router.push(`/workouts/${id}`)}
+        className="back-button"
+        onClick={() => router.back()}
       >
-        Volver al Entrenamiento
+        Volver al entrenamiento
       </button>
     </div>
   );

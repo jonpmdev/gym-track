@@ -307,7 +307,7 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
         
         {/* Pestañas para los días de la semana */}
         <div className="days-tabs-container">
-          <div className="flex overflow-x-auto mb-4 days-tabs">
+          <div className="days-tabs">
             {DAYS_OF_WEEK.map((day) => (
               <div
                 key={day}
@@ -322,27 +322,27 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
         
         {/* Contenido del día activo */}
         <div className="day-content">
-          <h4 className="text-lg font-medium mb-4">Ejercicios para {activeDay}</h4>
+          <h4>Ejercicios para {activeDay}</h4>
           
           {/* Lista de ejercicios del día actual */}
-          {getExercisesByDay(activeDay).length > 0 ? (
-            <div className="mb-6">
-              {getExercisesByDay(activeDay).map((exercise, index) => {
+          <div className="exercises-list">
+            {getExercisesByDay(activeDay).length > 0 ? (
+              getExercisesByDay(activeDay).map((exercise, index) => {
                 const exerciseIndex = exercises.findIndex(
                   (e) => e === exercise
                 );
                 return (
-                  <div key={index} className="exercise-card">
+                  <div key={index} className="exercise-item">
                     <div className="exercise-content">
-                      <div className="exercise-details">
-                        <h5 className="font-medium">{exercise.name}</h5>
-                        <p className="text-sm text-gray-600">
+                      <div className="exercise-info">
+                        <h5 className="exercise-name">{exercise.name}</h5>
+                        <p className="exercise-details">
                           {exercise.sets} series x {exercise.reps} repeticiones
                           {exercise.weight ? ` x ${exercise.weight} kg` : ''}
                           {exercise.rest ? ` | Descanso: ${exercise.rest}s` : ''}
                         </p>
                         {(exercise.muscleGroups?.length || exercise.focus) && (
-                          <p className="text-sm text-gray-500 mt-1">
+                          <p className="exercise-metadata">
                             {exercise.muscleGroups && exercise.muscleGroups.length > 0 && `Grupos: ${exercise.muscleGroups.join(', ')}`}
                             {exercise.muscleGroups && exercise.muscleGroups.length > 0 && exercise.focus && ' | '}
                             {exercise.focus && `Enfoque: ${exercise.focus}`}
@@ -368,13 +368,13 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
                     </div>
                   </div>
                 );
-              })}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-4 mb-6">
-              No hay ejercicios para {activeDay}. ¡Añade uno nuevo!
-            </p>
-          )}
+              })
+            ) : (
+              <p className="text-gray-500 text-center py-4 mb-6">
+                No hay ejercicios para {activeDay}. ¡Añade uno nuevo!
+              </p>
+            )}
+          </div>
           
           {/* Formulario para añadir/editar ejercicio */}
           <div className="bg-white p-4 rounded-lg border">

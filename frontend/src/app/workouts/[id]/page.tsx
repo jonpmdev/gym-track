@@ -25,7 +25,8 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
     try {
       setLoading(true);
       const token = Cookies.get('token');
-      const res = await fetch(`http://localhost:5000/api/workouts/${params.id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${apiUrl}/api/workouts/${params.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -99,6 +100,7 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
     try {
       setLoading(true);
       const token = Cookies.get('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       
       // Preparar los datos del entrenamiento con los ejercicios incluidos
       const validatedWorkoutData = {
@@ -120,7 +122,7 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
       console.log('Enviando datos actualizados:', validatedWorkoutData);
       
       // Actualizar el entrenamiento con todos los ejercicios en una sola petición
-      const res = await fetch(`http://localhost:5000/api/workouts/${workout.id}`, {
+      const res = await fetch(`${apiUrl}/api/workouts/${workout.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -166,10 +168,6 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
 
   const handleCancelEdit = () => {
     router.push('/workouts');
-  };
-
-  const navigateToProgressPage = () => {
-    router.push(`/workouts/${params.id}/progress`);
   };
 
   if (loading) {
@@ -219,16 +217,6 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
           <pre className="whitespace-pre-wrap text-xs overflow-auto max-h-40">{debugInfo}</pre>
         </div>
       )}
-      
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{workout.title}</h1>
-        <button 
-          className="progress-button"
-          onClick={navigateToProgressPage}
-        >
-          Registrar Progreso
-        </button>
-      </div>
       
       <WorkoutForm 
         onSubmit={handleUpdateWorkout} 

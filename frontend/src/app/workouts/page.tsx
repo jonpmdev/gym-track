@@ -436,6 +436,12 @@ export default function WorkoutsPage() {
                     Editar entrenamiento
                   </button>
                   <button 
+                    className="workout-action-button progress"
+                    onClick={() => router.push(`/workouts/${workout.id}/progress`)}
+                  >
+                    Registrar progreso
+                  </button>
+                  <button 
                     className="workout-action-button delete"
                     onClick={() => handleDeleteWorkout(workout.id)}
                   >

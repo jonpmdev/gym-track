@@ -240,6 +240,17 @@
   color: #1d4ed8;
 }
 
+.workout-action-button.progress {
+  color: #059669;
+  background-color: rgba(5, 150, 105, 0.1);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.workout-action-button.progress:hover {
+  background-color: rgba(5, 150, 105, 0.2);
+  color: #047857;
+}
+
 .workout-action-button.complete {
   color: #059669;
   background-color: rgba(5, 150, 105, 0.1);
