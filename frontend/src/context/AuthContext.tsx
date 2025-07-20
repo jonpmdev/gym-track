@@ -9,6 +9,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -28,17 +30,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const token = Cookies.get('token');
-      if (!token) {
+      const storedToken = Cookies.get('token');
+      if (!storedToken) {
         setLoading(false);
         return;
       }
 
-      console.log('Verificando autenticación con token:', token.substring(0, 20) + '...');
+      setToken(storedToken);
+      console.log('Verificando autenticación con token:', storedToken.substring(0, 20) + '...');
 
       const response = await fetch('http://localhost:5000/api/auth/me', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${storedToken}`
         }
       });
 
@@ -49,10 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         console.error('Error al verificar autenticación:', await response.text());
         Cookies.remove('token');
+        setToken(null);
       }
     } catch (error) {
       console.error('Error en checkAuth:', error);
       Cookies.remove('token');
+      setToken(null);
     } finally {
       setLoading(false);
     }
@@ -76,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log('Login exitoso, token recibido:', data.token.substring(0, 20) + '...');
       Cookies.set('token', data.token, { expires: 7 }); // Expira en 7 días
+      setToken(data.token);
       setUser(data.user);
       router.push('/dashboard');
     } catch (error: any) {
@@ -102,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log('Registro exitoso, token recibido:', data.token.substring(0, 20) + '...');
       Cookies.set('token', data.token, { expires: 7 }); // Expira en 7 días
+      setToken(data.token);
       setUser(data.user);
       router.push('/dashboard');
     } catch (error: any) {
@@ -112,12 +119,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     Cookies.remove('token');
+    setToken(null);
     setUser(null);
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

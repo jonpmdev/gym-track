@@ -34,6 +34,7 @@ export interface IExercise {
   day: string;
   created_at?: string;
   updated_at?: string;
+  exerciseProgress?: IExerciseProgress[];
 }
 
 export interface IWorkout {
@@ -53,6 +54,16 @@ export interface IProgress {
   date: string;
   weight: Decimal | string;
   measurements?: IMeasurements;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface IExerciseProgress {
+  id: string;
+  exercise_id: string;
+  weight: Decimal | string;
+  date: string;
   notes?: string;
   created_at?: string;
   updated_at?: string;

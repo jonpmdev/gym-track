@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
-import { register, login, getProfile } from '../controllers/authController';
+import { register, login, getProfile, updateProfile } from '../controllers/authController';
 import { auth } from '../middleware/auth';
 
 const router = Router();
@@ -30,5 +30,8 @@ router.post(
 
 // Obtener usuario actual
 router.get('/me', auth, getProfile);
+
+// Actualizar perfil del usuario
+router.put('/update', auth, updateProfile);
 
 export default router; 

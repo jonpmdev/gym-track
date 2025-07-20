@@ -50,6 +50,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Link href="/workouts" className="nav-link">
                   Entrenamientos
                 </Link>
+                <Link href="/profile/measurements" className="nav-link">
+                  Medidas
+                </Link>
                 <Link href="/progress" className="nav-link">
                   Progreso
                 </Link>

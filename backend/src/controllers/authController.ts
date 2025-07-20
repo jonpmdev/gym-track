@@ -123,4 +123,46 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
     console.error('Error al obtener perfil:', error);
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
+};
+
+export const updateProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'No autorizado' });
+    }
+
+    // Obtener los datos a actualizar
+    const { name, weight, height, measurements } = req.body;
+    
+    // Buscar usuario por ID
+    const user = await userModel.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Actualizar solo los campos proporcionados
+    const updateData: Partial<IUser> = {};
+    
+    if (name !== undefined) updateData.name = name;
+    if (weight !== undefined) updateData.weight = weight;
+    if (height !== undefined) updateData.height = height;
+    if (measurements !== undefined) updateData.measurements = measurements;
+
+    // Actualizar el usuario
+    const updatedUser = await userModel.update(userId, updateData);
+
+    // Responder con el usuario actualizado (sin la contraseña)
+    const { password: _, ...userWithoutPassword } = updatedUser as IUser;
+    
+    res.status(200).json({
+      message: 'Perfil actualizado correctamente',
+      user: userWithoutPassword
+    });
+  } catch (error: any) {
+    console.error('Error al actualizar perfil:', error);
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+  }
 }; 

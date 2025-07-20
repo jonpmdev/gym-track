@@ -4,6 +4,7 @@ import config from './config/config';
 import authRoutes from './routes/authRoutes';
 import workoutRoutes from './routes/workoutRoutes';
 import exerciseRoutes from './routes/exerciseRoutes';
+import exerciseProgressRoutes from './routes/exerciseProgressRoutes';
 import prisma from './config/prisma';
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/exercises', exerciseRoutes);
+app.use('/api/exercise-progress', exerciseProgressRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

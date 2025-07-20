@@ -168,6 +168,10 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
     router.push('/workouts');
   };
 
+  const navigateToProgressPage = () => {
+    router.push(`/workouts/${params.id}/progress`);
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -215,6 +219,17 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
           <pre className="whitespace-pre-wrap text-xs overflow-auto max-h-40">{debugInfo}</pre>
         </div>
       )}
+      
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">{workout.title}</h1>
+        <button 
+          className="progress-button"
+          onClick={navigateToProgressPage}
+        >
+          Registrar Progreso
+        </button>
+      </div>
+      
       <WorkoutForm 
         onSubmit={handleUpdateWorkout} 
         onCancel={handleCancelEdit} 
