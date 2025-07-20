@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import WorkoutForm from '@/components/WorkoutForm';
-import { Workout, Exercise } from '@/types';
+import { Workout } from '@/types';
 import './workout-details.css';
 import Cookies from 'js-cookie';
 import { toast, ToastContainer } from 'react-toastify';
@@ -15,7 +15,6 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
@@ -94,95 +93,7 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
     }
   };
 
-  const handleToggleExerciseComplete = async (exerciseIndex: number) => {
-    if (!workout) return;
-    
-    try {
-      setLoading(true);
-      
-      // Crear una copia profunda del workout
-      const updatedWorkout = JSON.parse(JSON.stringify(workout));
-      const exercise = updatedWorkout.exercises[exerciseIndex];
-      
-      // Actualizar el estado del ejercicio
-      const newCompletedState = !exercise.completed;
-      exercise.completed = newCompletedState;
-      
-      const token = Cookies.get('token');
-      
-      // Usar el nuevo endpoint de ejercicios para actualizar el estado
-      if (exercise.id) {
-        const res = await fetch(`http://localhost:5000/api/exercises/${exercise.id}/completed`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            completed: newCompletedState
-          }),
-        });
-
-        if (!res.ok) {
-          throw new Error('Error al actualizar el ejercicio');
-        }
-        
-        toast.success(`Ejercicio ${newCompletedState ? 'completado' : 'marcado como pendiente'}`, {
-          position: "top-center",
-          autoClose: 2000,
-        });
-      }
-      
-      // Verificar si todos los ejercicios están completados
-      const allExercisesCompleted = updatedWorkout.exercises.every((ex: Exercise) => ex.completed);
-      
-      // Si el estado de completado del workout ha cambiado, actualizarlo
-      if (updatedWorkout.completed !== allExercisesCompleted) {
-        updatedWorkout.completed = allExercisesCompleted;
-        
-        // Actualizar el estado de completado del workout
-        const workoutRes = await fetch(`http://localhost:5000/api/workouts/${params.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            completed: allExercisesCompleted
-          }),
-        });
-
-        if (!workoutRes.ok) {
-          throw new Error('Error al actualizar el estado del entrenamiento');
-        }
-        
-        if (allExercisesCompleted) {
-          toast.success('¡Entrenamiento completado!', {
-            position: "top-center",
-            autoClose: 3000,
-            icon: "🎉" as any,
-          });
-        }
-      }
-
-      // Actualizar el estado local
-      setWorkout(updatedWorkout);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Error: ${err.message}`, {
-        position: "top-center",
-        autoClose: 3000,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditWorkout = () => {
-    setIsEditing(true);
-  };
-
-  const handleUpdateWorkout = async (workoutData: Omit<Workout, 'id' | 'completed'>) => {
+  const handleUpdateWorkout = async (workoutData: Omit<Workout, 'id'>) => {
     if (!workout) return;
 
     try {
@@ -202,7 +113,6 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
           rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
           muscle_groups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
           focus: exercise.focus !== undefined ? String(exercise.focus) : '',
-          completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
           day: String(exercise.day)
         }))
       };
@@ -241,9 +151,8 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
         autoClose: 2000,
       });
       
-      // Actualizar el estado local y salir del modo edición
-      await fetchWorkout();
-      setIsEditing(false);
+      // Redirigir a la lista de entrenamientos
+      router.push('/workouts');
     } catch (err: any) {
       setError(err.message);
       toast.error(`Error: ${err.message}`, {
@@ -256,23 +165,10 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
   };
 
   const handleCancelEdit = () => {
-    setIsEditing(false);
-  };
-
-  const handleBackToWorkouts = () => {
     router.push('/workouts');
   };
 
-  // Agrupar ejercicios por día
-  const exercisesByDay = workout && workout.exercises ? workout.exercises.reduce((acc: Record<string, Exercise[]>, exercise) => {
-    if (!acc[exercise.day]) {
-      acc[exercise.day] = [];
-    }
-    acc[exercise.day].push(exercise);
-    return acc;
-  }, {}) : {};
-
-  if (loading && !isEditing) {
+  if (loading) {
     return (
       <DashboardLayout>
         <div className="flex justify-center items-center h-64">
@@ -282,13 +178,13 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
     );
   }
 
-  if (error && !isEditing) {
+  if (error) {
     return (
       <DashboardLayout>
         <div className="error-message mb-4">{error}</div>
         <button 
           className="back-button"
-          onClick={handleBackToWorkouts}
+          onClick={() => router.push('/workouts')}
         >
           &larr; Volver a entrenamientos
         </button>
@@ -296,29 +192,16 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
     );
   }
 
-  if (!workout && !isEditing) {
+  if (!workout) {
     return (
       <DashboardLayout>
         <div className="error-message mb-4">No se encontró el entrenamiento</div>
         <button 
           className="back-button"
-          onClick={handleBackToWorkouts}
+          onClick={() => router.push('/workouts')}
         >
           &larr; Volver a entrenamientos
         </button>
-      </DashboardLayout>
-    );
-  }
-
-  if (isEditing && workout) {
-    return (
-      <DashboardLayout>
-        <ToastContainer />
-        <WorkoutForm 
-          onSubmit={handleUpdateWorkout} 
-          onCancel={handleCancelEdit} 
-          initialData={workout}
-        />
       </DashboardLayout>
     );
   }
@@ -326,114 +209,17 @@ export default function WorkoutDetailsPage({ params }: { params: { id: string } 
   return (
     <DashboardLayout>
       <ToastContainer />
-      <div className="workout-details-container">
-        {debugInfo && (
-          <div className="debug-info p-4 mb-4 bg-yellow-100 border border-yellow-400 rounded">
-            <h4 className="font-bold mb-2">Información de depuración:</h4>
-            <pre className="whitespace-pre-wrap text-xs overflow-auto max-h-40">{debugInfo}</pre>
-          </div>
-        )}
-        
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <button 
-              className="back-button mb-2"
-              onClick={handleBackToWorkouts}
-            >
-              &larr; Volver a entrenamientos
-            </button>
-            <h1 className="workout-details-title">{workout?.title}</h1>
-          </div>
-          <div className="flex items-center">
-            <span
-              className={`workout-status mr-4 ${
-                workout?.completed ? 'completed' : 'in-progress'
-              }`}
-            >
-              {workout?.completed ? 'Completado' : 'En progreso'}
-            </span>
-            <button 
-              className="primary-button"
-              onClick={handleEditWorkout}
-            >
-              Editar entrenamiento
-            </button>
-          </div>
+      {debugInfo && (
+        <div className="debug-info p-4 mb-4 bg-yellow-100 border border-yellow-400 rounded">
+          <h4 className="font-bold mb-2">Información de depuración:</h4>
+          <pre className="whitespace-pre-wrap text-xs overflow-auto max-h-40">{debugInfo}</pre>
         </div>
-
-        {workout?.notes && (
-          <div className="workout-notes-section">
-            <h3 className="section-title">Notas</h3>
-            <p>{workout.notes}</p>
-          </div>
-        )}
-
-        <div className="workout-exercises-section">
-          <h3 className="section-title">Ejercicios</h3>
-          
-          {Object.keys(exercisesByDay).length === 0 ? (
-            <div>
-              <p className="text-gray-500 mb-4">No hay ejercicios en este entrenamiento.</p>
-              <div className="mt-2 p-4 bg-blue-50 rounded">
-                <p className="text-sm text-blue-700 mb-3">Añade ejercicios para comenzar a registrar tu progreso.</p>
-                <button 
-                  className="primary-button w-full md:w-auto"
-                  onClick={handleEditWorkout}
-                >
-                  Añadir ejercicios
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="days-tabs">
-              {Object.entries(exercisesByDay).map(([day, exercises]) => (
-                <div key={day} className="day-section">
-                  <h4 className="day-title">{day}</h4>
-                  <div className="exercises-list">
-                    {exercises.map((exercise, index) => {
-                      const exerciseIndex = workout?.exercises.findIndex(
-                        (e) => e === exercise
-                      );
-                      return (
-                        <div 
-                          key={index} 
-                          className={`exercise-item ${exercise.completed ? 'completed' : ''}`}
-                        >
-                          <div className="exercise-content">
-                            <div className="exercise-info">
-                              <h5 className="exercise-name">{exercise.name}</h5>
-                              <p className="exercise-details">
-                                {exercise.sets} series x {exercise.reps} repeticiones
-                                {exercise.weight ? ` x ${exercise.weight} kg` : ''}
-                                {exercise.rest ? ` | Descanso: ${exercise.rest}s` : ''}
-                              </p>
-                              {(exercise.muscleGroups?.length || exercise.focus) && (
-                                <p className="exercise-metadata">
-                                  {exercise.muscleGroups && exercise.muscleGroups.length > 0 && `Grupos: ${exercise.muscleGroups.join(', ')}`}
-                                  {exercise.muscleGroups && exercise.muscleGroups.length > 0 && exercise.focus && ' | '}
-                                  {exercise.focus && `Enfoque: ${exercise.focus}`}
-                                </p>
-                              )}
-                            </div>
-                            <div className="exercise-actions">
-                              <button
-                                className={`toggle-complete-button ${exercise.completed ? 'completed' : ''}`}
-                                onClick={() => exerciseIndex !== undefined && handleToggleExerciseComplete(exerciseIndex)}
-                              >
-                                {exercise.completed ? 'Completado' : 'Marcar completado'}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      )}
+      <WorkoutForm 
+        onSubmit={handleUpdateWorkout} 
+        onCancel={handleCancelEdit} 
+        initialData={workout}
+      />
     </DashboardLayout>
   );
 } 

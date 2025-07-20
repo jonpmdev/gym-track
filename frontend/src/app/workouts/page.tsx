@@ -87,7 +87,7 @@ export default function WorkoutsPage() {
     }
   };
 
-  const handleCreateWorkout = async (workoutData: Omit<Workout, 'id' | 'completed'>) => {
+  const handleCreateWorkout = async (workoutData: Omit<Workout, 'id'>) => {
     try {
       setLoading(true);
       const token = Cookies.get('token');
@@ -116,7 +116,6 @@ export default function WorkoutsPage() {
           rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
           muscle_groups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
           focus: exercise.focus !== undefined ? String(exercise.focus) : '',
-          completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
           day: String(exercise.day)
         }))
       };
@@ -178,7 +177,7 @@ export default function WorkoutsPage() {
     }
   };
 
-  const handleUpdateWorkout = async (workoutData: Omit<Workout, 'id' | 'completed'>) => {
+  const handleUpdateWorkout = async (workoutData: Omit<Workout, 'id'>) => {
     if (!editWorkout) return;
 
     try {
@@ -197,7 +196,6 @@ export default function WorkoutsPage() {
           rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
           muscle_groups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
           focus: exercise.focus !== undefined ? String(exercise.focus) : '',
-          completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
           day: String(exercise.day)
         }))
       };
@@ -291,37 +289,6 @@ export default function WorkoutsPage() {
     }
   };
 
-  const handleToggleComplete = async (workout: Workout) => {
-    try {
-      setLoading(true);
-      const token = Cookies.get('token');
-      const res = await fetch(`http://localhost:5000/api/workouts/${workout.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          completed: !workout.completed
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Error al actualizar el estado del entrenamiento');
-      }
-
-      await fetchWorkouts();
-    } catch (err: any) {
-      console.error('Error al actualizar el estado del entrenamiento:', err);
-      toast.error(`Error: ${err.message}`, {
-        position: "top-center",
-        autoClose: 3000,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleViewWorkout = (workout: Workout) => {
     router.push(`/workouts/${workout.id}`);
   };
@@ -337,7 +304,7 @@ export default function WorkoutsPage() {
     router.push('/workouts');
   };
 
-  const handleFormSubmit = (workoutData: Omit<Workout, 'id' | 'completed'>) => {
+  const handleFormSubmit = (workoutData: Omit<Workout, 'id'>) => {
     if (editWorkout) {
       handleUpdateWorkout(workoutData);
     } else {
@@ -432,13 +399,6 @@ export default function WorkoutsPage() {
               >
                 <div className="workout-card-header">
                   <h3 className="workout-card-title">{workout.title}</h3>
-                  <span
-                    className={`workout-status ${
-                      workout.completed ? 'completed' : 'in-progress'
-                    }`}
-                  >
-                    {workout.completed ? 'Completado' : 'En progreso'}
-                  </span>
                 </div>
 
                 <div className="workout-card-body">
@@ -473,13 +433,7 @@ export default function WorkoutsPage() {
                     className="workout-action-button view"
                     onClick={() => handleViewWorkout(workout)}
                   >
-                    Ver detalles
-                  </button>
-                  <button 
-                    className={`workout-action-button ${workout.completed ? 'incomplete' : 'complete'}`}
-                    onClick={() => handleToggleComplete(workout)}
-                  >
-                    {workout.completed ? 'Marcar incompleto' : 'Marcar completado'}
+                    Editar entrenamiento
                   </button>
                   <button 
                     className="workout-action-button delete"

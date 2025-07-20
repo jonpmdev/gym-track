@@ -24,7 +24,6 @@ export interface Exercise {
   muscleGroups?: string[];
   muscle_groups?: string[]; // Para compatibilidad con el backend
   focus?: string;
-  completed?: boolean;
   day: string;
   createdAt?: string;
   updatedAt?: string;
@@ -38,7 +37,6 @@ export interface Workout {
   title: string;
   exercises: Exercise[];
   notes?: string;
-  completed?: boolean;
   createdAt?: string;
   updatedAt?: string;
   created_at?: string; // Para compatibilidad con el backend

@@ -7,7 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface WorkoutFormProps {
-  onSubmit: (workout: Omit<Workout, 'id' | 'completed'>) => void;
+  onSubmit: (workout: Omit<Workout, 'id'>) => void;
   onCancel: () => void;
   initialData?: Workout;
 }
@@ -55,7 +55,7 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
   const [activeDay, setActiveDay] = useState(DAYS_OF_WEEK[0]);
   
   // Estado para el ejercicio actual que se está creando/editando
-  const [currentExercise, setCurrentExercise] = useState<Omit<Exercise, 'completed'>>({
+  const [currentExercise, setCurrentExercise] = useState<Omit<Exercise, 'id'>>({
     name: '',
     sets: 3,
     reps: '10',
@@ -81,7 +81,7 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
   };
 
   // Función para manejar cambios en los campos del ejercicio actual
-  const handleExerciseChange = (field: keyof Omit<Exercise, 'completed'>, value: any) => {
+  const handleExerciseChange = (field: keyof Omit<Exercise, 'id'>, value: any) => {
     setCurrentExercise(prev => ({ ...prev, [field]: value }));
   };
 
@@ -114,7 +114,7 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
     if (editMode && editIndex !== null) {
       // Actualizar ejercicio existente
       const updatedExercises = [...exercises];
-      updatedExercises[editIndex] = { ...currentExercise, completed: false };
+      updatedExercises[editIndex] = { ...currentExercise };
       setExercises(updatedExercises);
       setEditMode(false);
       setEditIndex(null);
@@ -128,7 +128,7 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
       });
     } else {
       // Añadir nuevo ejercicio
-      setExercises([...exercises, { ...currentExercise, completed: false }]);
+      setExercises([...exercises, { ...currentExercise }]);
       toast.success('Ejercicio añadido correctamente', {
         position: "top-center",
         autoClose: 2000,
@@ -241,8 +241,7 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
       return;
     }
     
-    // Asegurarse de que todos los ejercicios tengan el campo completed
-    // y que los tipos de datos sean correctos
+    // Asegurarse de que todos los tipos de datos sean correctos
     const validatedExercises = exercises.map(exercise => ({
       name: String(exercise.name),
       sets: Number(exercise.sets),
@@ -253,7 +252,6 @@ export default function WorkoutForm({ onSubmit, onCancel, initialData }: Workout
       // Añadir campo muscle_groups para compatibilidad con el backend
       muscle_groups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
       focus: exercise.focus !== undefined ? String(exercise.focus) : '',
-      completed: exercise.completed !== undefined ? Boolean(exercise.completed) : false,
       day: String(exercise.day)
     }));
     
