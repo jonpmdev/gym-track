@@ -2,61 +2,55 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Workout } from '../models/workout.model';
+import { Exercise } from '../models/exercise.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WorkoutService {
+export class ExerciseService {
   private apiUrl = environment.apiUrl || 'http://localhost:5000';
   
-  constructor(private http: HttpClient) {
-  }
+  constructor(private http: HttpClient) {}
 
-  // MÉTODOS DE WORKOUTS
-
-  // Obtener todos los entrenamientos
-  getWorkouts(): Observable<Workout[]> {
-    return this.http.get<Workout[]>(`${this.apiUrl}/api/workouts`)
+  // Obtener ejercicios por ID de entrenamiento
+  getExercisesByWorkout(workoutId: string): Observable<Exercise[]> {
+    return this.http.get<Exercise[]>(`${this.apiUrl}/api/exercises/workout/${workoutId}`)
       .pipe(
-        map(response => {   
-          return response;
-        }),
-        catchError(this.handleError<Workout[]>('getWorkouts', []))
+        catchError(this.handleError<Exercise[]>(`getExercisesByWorkout workoutId=${workoutId}`, []))
       );
   }
 
-  // Obtener un entrenamiento por ID
-  getWorkout(id: string): Observable<Workout> {
-    return this.http.get<Workout>(`${this.apiUrl}/api/workouts/${id}`)
+  // Obtener un ejercicio por ID
+  getExerciseById(id: string): Observable<Exercise | null> {
+    return this.http.get<Exercise>(`${this.apiUrl}/api/exercises/${id}`)
       .pipe(
-        catchError(this.handleError<Workout>(`getWorkout id=${id}`))
+        catchError(this.handleError<Exercise | null>(`getExerciseById id=${id}`, null))
       );
   }
 
-  // Crear un nuevo entrenamiento
-  createWorkout(workout: Omit<Workout, 'id'>): Observable<Workout> {
-    return this.http.post<Workout>(`${this.apiUrl}/api/workouts`, workout)
+  // Crear un nuevo ejercicio
+  createExercise(exercise: Omit<Exercise, 'id'>): Observable<Exercise> {
+    return this.http.post<Exercise>(`${this.apiUrl}/api/exercises`, exercise)
       .pipe(
-        catchError(this.handleError<Workout>('createWorkout'))
+        catchError(this.handleError<Exercise>('createExercise'))
       );
   }
 
-  // Actualizar un entrenamiento existente
-  updateWorkout(id: string, workout: Omit<Workout, 'id'>): Observable<Workout> {
-    return this.http.put<Workout>(`${this.apiUrl}/api/workouts/${id}`, workout)
+  // Actualizar un ejercicio existente
+  updateExercise(id: string, exercise: Partial<Exercise>): Observable<Exercise | null> {
+    return this.http.put<Exercise>(`${this.apiUrl}/api/exercises/${id}`, exercise)
       .pipe(
-        catchError(this.handleError<Workout>(`updateWorkout id=${id}`))
+        catchError(this.handleError<Exercise | null>(`updateExercise id=${id}`, null))
       );
   }
 
-  // Eliminar un entrenamiento
-  deleteWorkout(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/workouts/${id}`)
+  // Eliminar un ejercicio
+  deleteExercise(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/api/exercises/${id}`)
       .pipe(
         map(() => undefined),
-        catchError(this.handleError<void>(`deleteWorkout id=${id}`))
+        catchError(this.handleError<void>(`deleteExercise id=${id}`))
       );
   }
 
@@ -87,4 +81,4 @@ export class WorkoutService {
       return throwError(() => new Error(errorMessage));
     };
   }
-}
+} 

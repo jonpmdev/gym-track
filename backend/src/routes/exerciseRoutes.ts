@@ -25,17 +25,11 @@ const updateExerciseValidations = [
   body('reps').optional().notEmpty().withMessage('Las repeticiones no pueden estar vacías'),
 ];
 
-const toggleCompletedValidations = [
-  param('id').isString().withMessage('ID de ejercicio inválido'),
-  body('completed').isBoolean().withMessage('El valor de "completed" debe ser un booleano')
-];
-
 // Rutas para ejercicios
 router.get('/workout/:workoutId', exerciseController.getExercisesByWorkout);
 router.get('/:id', exerciseController.getExerciseById);
 router.post('/', ValidationService.validate(createExerciseValidations), exerciseController.createExercise);
 router.put('/:id', ValidationService.validate(updateExerciseValidations), exerciseController.updateExercise);
 router.delete('/:id', exerciseController.deleteExercise);
-router.patch('/:id/completed', ValidationService.validate(toggleCompletedValidations), exerciseController.toggleExerciseCompleted);
 
 export default router; 

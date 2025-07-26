@@ -99,24 +99,6 @@ export class PrismaExerciseRepository implements IExerciseRepository {
     });
     return result.count;
   }
-
-  async updateCompleted(id: string, completed: boolean): Promise<IExercise | null> {
-    try {
-      const exercise = await prisma.exercise.update({
-        where: { id },
-        data: { completed }
-      });
-
-      return {
-        ...exercise,
-        muscle_groups: exercise.muscle_groups as string[],
-        created_at: exercise.created_at?.toISOString() || new Date().toISOString(),
-        updated_at: exercise.updated_at?.toISOString() || new Date().toISOString()
-      } as IExercise;
-    } catch (error) {
-      return null;
-    }
-  }
 }
 
 // Implementación en memoria para pruebas
@@ -179,9 +161,5 @@ export class InMemoryExerciseRepository implements IExerciseRepository {
     const initialLength = this.exercises.length;
     this.exercises = this.exercises.filter(exercise => exercise.workout_id !== workoutId);
     return initialLength - this.exercises.length;
-  }
-
-  async updateCompleted(id: string, completed: boolean): Promise<IExercise | null> {
-    return this.update(id, { completed });
   }
 } 

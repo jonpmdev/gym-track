@@ -140,34 +140,6 @@ class ExerciseController {
       });
     }
   }
-
-  // Marcar ejercicio como completado/no completado
-  async toggleExerciseCompleted(req: Request, res: Response) {
-    try {
-      const exerciseId = req.params.id;
-      const { completed } = req.body;
-      
-      const updatedExercise = await this.exerciseService.toggleExerciseCompleted(exerciseId, completed);
-      
-      if (!updatedExercise) {
-        return res.status(404).json({
-          success: false,
-          message: 'Ejercicio no encontrado'
-        });
-      }
-      
-      return res.status(200).json({
-        success: true,
-        data: updatedExercise
-      });
-    } catch (error) {
-      console.error('Error al actualizar estado del ejercicio:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Error al actualizar estado del ejercicio'
-      });
-    }
-  }
 }
 
 export default new ExerciseController(); 

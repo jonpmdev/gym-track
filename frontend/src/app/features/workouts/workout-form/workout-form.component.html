@@ -71,6 +71,7 @@
                   (click)="editExercise(exercises.indexOf(exercise))"
                   class="workout-action-button view"
                 >
+                  <i class="fas fa-edit"></i>
                   Editar
                 </button>
                 <button
@@ -78,6 +79,7 @@
                   (click)="removeExercise(exercises.indexOf(exercise))"
                   class="workout-action-button delete"
                 >
+                  <i class="fas fa-trash"></i>
                   Eliminar
                 </button>
               </div>
@@ -252,17 +254,17 @@
   <!-- Botones de acción -->
   <div class="form-actions">
     <button
+      type="submit"
+      class="primary-button"
+    >
+      {{ initialData ? 'Actualizar entrenamiento' : 'Guardar entrenamiento' }}
+    </button>
+    <button
       type="button"
       (click)="handleCancel()"
       class="cancel-button"
     >
       Cancelar
-    </button>
-    <button
-      type="submit"
-      class="primary-button"
-    >
-      {{ initialData ? 'Actualizar entrenamiento' : 'Guardar entrenamiento' }}
     </button>
   </div>
 </form>

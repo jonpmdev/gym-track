@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Workout } from '../../core/models/workout.model';
 import { AuthService } from '../../core/services/auth.service';
+import { WorkoutService } from '../../core/services/workout.service';
 import { WorkoutFormComponent } from './workout-form/workout-form.component';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
@@ -24,6 +25,7 @@ export class WorkoutsComponent implements OnInit {
     public router: Router, // Cambiado a público para acceder desde la plantilla
     private route: ActivatedRoute,
     private authService: AuthService,
+    private workoutService: WorkoutService,
     private toastr: ToastrService
   ) {}
 
@@ -45,37 +47,65 @@ export class WorkoutsComponent implements OnInit {
   }
 
   fetchWorkouts(): void {
-    // Aquí implementaremos el servicio de workouts más adelante
-    // Por ahora simulamos la carga
-    setTimeout(() => {
-      this.workouts = [];
-      this.loading = false;
-    }, 1000);
+    this.loading = true;
+    this.workoutService.getWorkouts().subscribe({
+      next: (workouts) => {
+        this.workouts = workouts;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar entrenamientos:', error);
+        this.toastr.error('Error al cargar los entrenamientos');
+        this.loading = false;
+      }
+    });
   }
 
   fetchSingleWorkout(id: string): void {
-    // Aquí implementaremos el servicio de workouts más adelante
-    // Por ahora simulamos la carga
-    setTimeout(() => {
-      this.editWorkout = null;
-      this.showForm = true;
-      this.loading = false;
-    }, 1000);
+    this.loading = true;
+    this.workoutService.getWorkout(id).subscribe({
+      next: (workout) => {
+        this.editWorkout = workout;
+        this.showForm = true;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar entrenamiento:', error);
+        this.toastr.error('Error al cargar el entrenamiento');
+        this.loading = false;
+      }
+    });
   }
 
   handleCreateWorkout(workoutData: any): void {
-    // Implementar más adelante
-    console.log('Crear workout:', workoutData);
-    this.toastr.success('Entrenamiento creado correctamente');
-    this.showForm = false;
+    this.workoutService.createWorkout(workoutData).subscribe({
+      next: (workout) => {
+        this.toastr.success('Entrenamiento creado correctamente');
+        this.showForm = false;
+        this.fetchWorkouts();
+      },
+      error: (error) => {
+        console.error('Error al crear entrenamiento:', error);
+        this.toastr.error('Error al crear el entrenamiento');
+      }
+    });
   }
 
   handleUpdateWorkout(workoutData: any): void {
-    // Implementar más adelante
-    console.log('Actualizar workout:', workoutData);
-    this.toastr.success('Entrenamiento actualizado correctamente');
-    this.showForm = false;
-    this.editWorkout = null;
+    if (!this.editWorkout?.id) return;
+    
+    this.workoutService.updateWorkout(this.editWorkout.id, workoutData).subscribe({
+      next: (workout) => {
+        this.toastr.success('Entrenamiento actualizado correctamente');
+        this.showForm = false;
+        this.editWorkout = null;
+        this.fetchWorkouts();
+      },
+      error: (error) => {
+        console.error('Error al actualizar entrenamiento:', error);
+        this.toastr.error('Error al actualizar el entrenamiento');
+      }
+    });
   }
 
   handleDeleteWorkout(id: string): void {
@@ -90,9 +120,16 @@ export class WorkoutsComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Implementar más adelante
-        console.log('Eliminar workout:', id);
-        this.toastr.success('Entrenamiento eliminado correctamente');
+        this.workoutService.deleteWorkout(id).subscribe({
+          next: () => {
+            this.toastr.success('Entrenamiento eliminado correctamente');
+            this.fetchWorkouts();
+          },
+          error: (error) => {
+            console.error('Error al eliminar entrenamiento:', error);
+            this.toastr.error('Error al eliminar el entrenamiento');
+          }
+        });
       }
     });
   }

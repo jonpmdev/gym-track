@@ -3,7 +3,7 @@
 }
 
 .workouts-title {
-  @apply font-teko text-text-dark text-4xl font-semibold uppercase tracking-wider shadow-[1px_1px_0px_rgba(0,0,0,0.1)];
+  @apply font-teko text-text-dark text-4xl font-semibold uppercase tracking-wider shadow-[0px_2px_0px_rgba(0,0,0,0.1)];
 }
 
 .workouts-list {
@@ -160,6 +160,14 @@
   letter-spacing: 0.05em;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  i {
+    font-size: 0.9rem;
+  }
   
   &::before {
     content: '';

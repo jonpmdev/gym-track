@@ -30,7 +30,6 @@ export interface IExercise {
   rest?: string;
   muscle_groups?: string[];
   focus?: string;
-  completed?: boolean;
   day: string;
   created_at?: string;
   updated_at?: string;

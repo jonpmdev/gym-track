@@ -262,9 +262,23 @@
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 1rem;
   margin-top: 2rem;
+}
+
+.cancel-button, .primary-button {
+  flex: 1;
+  padding: 0.85rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .cancel-button {
@@ -276,6 +290,38 @@
   background-color: #dc2626;
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+}
+
+.secondary-button {
+  background-color: #e5e7eb;
+  color: #4b5563;
+  padding: 0.85rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.secondary-button:hover {
+  background-color: #d1d5db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 /* Sección para agregar nuevo ejercicio */
@@ -303,7 +349,7 @@
 }
 
 .add-exercise-button {
-  background-color: #10b981;
+  background-color: var(--primary-color);
   color: white;
   width: 100%;
   padding: 0.85rem;
@@ -316,12 +362,12 @@
   letter-spacing: 1px;
   border: none;
   margin-top: 1rem;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 
   &:hover {
-    background-color: #059669;
+    background-color: #1d4ed8;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
   }
 }
 
@@ -497,12 +543,12 @@
   }
 
   .form-actions {
-    flex-direction: column-reverse;
+    flex-direction: row;
     gap: 0.75rem;
   }
 
   .form-actions button {
-    width: 100%;
+    width: auto;
     min-width: auto;
   }
 }

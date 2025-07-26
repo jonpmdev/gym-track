@@ -11,7 +11,6 @@ export interface IExerciseRepository extends IRepository<IExercise> {
   findByWorkoutId(workoutId: string): Promise<IExercise[]>;
   createMany(exercisesData: Omit<IExercise, 'id' | 'created_at' | 'updated_at'>[]): Promise<number>;
   deleteByWorkoutId(workoutId: string): Promise<number>;
-  updateCompleted(id: string, completed: boolean): Promise<IExercise | null>;
 }
 
 export interface IWorkoutRepository extends IRepository<IWorkout> {

@@ -27,8 +27,4 @@ export class ExerciseService {
   async deleteExercise(id: string): Promise<boolean> {
     return this.repository.delete(id);
   }
-
-  async toggleExerciseCompleted(id: string, completed: boolean): Promise<IExercise | null> {
-    return this.repository.updateCompleted(id, completed);
-  }
 } 

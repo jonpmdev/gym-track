@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap, finalize } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -18,15 +18,14 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
   private loadingSubject = new BehaviorSubject<boolean>(true);
+  private tokenValidatedSubject = new BehaviorSubject<boolean>(false);
 
   public currentUser$ = this.currentUserSubject.asObservable();
   public token$ = this.tokenSubject.asObservable();
   public loading$ = this.loadingSubject.asObservable();
+  public tokenValidated$ = this.tokenValidatedSubject.asObservable();
 
   private apiUrl = environment.apiUrl || 'http://localhost:5000';
-  
-  // Modo de desarrollo - permite navegar sin autenticación
-  private devMode = true;
 
   constructor(
     private http: HttpClient,
@@ -44,126 +43,105 @@ export class AuthService {
   }
 
   get isAuthenticated(): boolean {
-    // En modo desarrollo, siempre devuelve true
-    if (this.devMode) return true;
-    return !!this.tokenSubject.value;
+    return !!this.tokenSubject.value && this.tokenValidatedSubject.value;
   }
 
   private checkAuth(): void {
     try {
-      // En modo desarrollo, simula un usuario autenticado
-      if (this.devMode) {
-        const mockUser: User = {
-          id: 'dev-user-id',
-          email: 'dev@example.com',
-          name: 'Usuario Desarrollo'
-        };
-        this.currentUserSubject.next(mockUser);
-        this.loadingSubject.next(false);
-        return;
-      }
-      
       const storedToken = localStorage.getItem('token');
       if (!storedToken) {
         this.loadingSubject.next(false);
+        this.tokenValidatedSubject.next(false);
         return;
       }
 
       this.tokenSubject.next(storedToken);
-      console.log('Verificando autenticación con token:', storedToken.substring(0, 20) + '...');
       
-      this.http.get<{ user: User }>(`${this.apiUrl}/api/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${storedToken}`
-        }
-      }).pipe(
-        tap(response => {
-          console.log('Usuario autenticado:', response.user);
-          this.currentUserSubject.next(response.user);
-        }),
-        catchError(error => {
-          console.error('Error al verificar autenticación:', error);
+      // Usar el token del localStorage directamente para evitar dependencia circular
+      this.fetchCurrentUser(storedToken).subscribe({
+        next: (user) => {
+          this.tokenValidatedSubject.next(true);
+        },
+        error: (error) => {
           localStorage.removeItem('token');
           this.tokenSubject.next(null);
-          return throwError(() => error);
-        })
-      ).subscribe({
+          this.tokenValidatedSubject.next(false);
+        },
         complete: () => this.loadingSubject.next(false)
       });
     } catch (error) {
-      console.error('Error en checkAuth:', error);
       localStorage.removeItem('token');
       this.tokenSubject.next(null);
+      this.tokenValidatedSubject.next(false);
       this.loadingSubject.next(false);
     }
   }
 
+  // Método separado para obtener el usuario actual
+  fetchCurrentUser(token: string): Observable<User> {
+    return this.http.get<{ user: User }>(`${this.apiUrl}/api/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      tap(response => {
+        this.currentUserSubject.next(response.user);
+      }),
+      map(response => response.user),
+      catchError(error => {
+        console.error('Error al obtener el usuario actual:', error);
+        localStorage.removeItem('token');
+        this.tokenSubject.next(null);
+        return throwError(() => error);
+      })
+    );
+  }
+
   login(email: string, password: string): Observable<AuthResponse> {
-    // En modo desarrollo, simula un login exitoso
-    if (this.devMode) {
-      const mockResponse: AuthResponse = {
-        token: 'dev-token',
-        user: {
-          id: 'dev-user-id',
-          email: email,
-          name: 'Usuario Desarrollo'
-        }
-      };
-      
-      return of(mockResponse).pipe(
-        tap(response => {
-          this.currentUserSubject.next(response.user);
-          this.tokenSubject.next(response.token);
-        })
-      );
-    }
-    
     return this.http.post<AuthResponse>(`${this.apiUrl}/api/auth/login`, { email, password })
       .pipe(
         tap(response => {
-          console.log('Login exitoso, token recibido:', response.token.substring(0, 20) + '...');
           localStorage.setItem('token', response.token);
           this.tokenSubject.next(response.token);
           this.currentUserSubject.next(response.user);
         }),
         catchError(error => {
-          console.error('Error en login:', error);
-          return throwError(() => new Error(error.error?.message || 'Error al iniciar sesión'));
+          let errorMessage = 'Error al iniciar sesión';
+          
+          if (error.status === 401) {
+            errorMessage = 'Credenciales inválidas. Verifica tu email y contraseña.';
+          } else if (error.status === 500) {
+            errorMessage = 'Error en el servidor. Inténtalo más tarde.';
+          } else if (error.error && error.error.message) {
+            errorMessage = error.error.message;
+          }
+          
+          return throwError(() => new Error(errorMessage));
         })
       );
   }
 
   register(email: string, password: string): Observable<AuthResponse> {
-    // En modo desarrollo, simula un registro exitoso
-    if (this.devMode) {
-      const mockResponse: AuthResponse = {
-        token: 'dev-token',
-        user: {
-          id: 'dev-user-id',
-          email: email,
-          name: 'Usuario Desarrollo'
-        }
-      };
-      
-      return of(mockResponse).pipe(
-        tap(response => {
-          this.currentUserSubject.next(response.user);
-          this.tokenSubject.next(response.token);
-        })
-      );
-    }
-    
+
     return this.http.post<AuthResponse>(`${this.apiUrl}/api/auth/register`, { email, password })
       .pipe(
         tap(response => {
-          console.log('Registro exitoso, token recibido:', response.token.substring(0, 20) + '...');
           localStorage.setItem('token', response.token);
           this.tokenSubject.next(response.token);
           this.currentUserSubject.next(response.user);
         }),
         catchError(error => {
-          console.error('Error en registro:', error);
-          return throwError(() => new Error(error.error?.message || 'Error al registrar usuario'));
+          let errorMessage = 'Error al registrar usuario';
+          
+          if (error.status === 400) {
+            errorMessage = error.error?.message || 'El correo electrónico ya está registrado';
+          } else if (error.status === 500) {
+            errorMessage = 'Error en el servidor. Inténtalo más tarde.';
+          } else if (error.error && error.error.message) {
+            errorMessage = error.error.message;
+          }
+          
+          return throwError(() => new Error(errorMessage));
         })
       );
   }

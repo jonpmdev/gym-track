@@ -32,6 +32,12 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     // Obtener URL de retorno desde los parámetros de la ruta o usar por defecto '/dashboard'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+    
+    // Comprobar si hay un error en los parámetros de la URL
+    const errorParam = this.route.snapshot.queryParams['error'];
+    if (errorParam === 'sesion_expirada') {
+      this.error = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+    }
   }
 
   // Getter para acceso fácil a los campos del formulario

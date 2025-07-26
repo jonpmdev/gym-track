@@ -5,8 +5,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 
 import { routes } from './app.routes';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { ReactiveFormsModule } from '@angular/forms';
 
 export const appConfig: ApplicationConfig = {
@@ -15,8 +14,9 @@ export const appConfig: ApplicationConfig = {
       routes,
       withPreloading(PreloadAllModules) // Precargar módulos para mejorar la experiencia de navegación
     ),
-    provideHttpClient(),
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    provideHttpClient(
+      withInterceptors([authInterceptor])
+    ),
     importProvidersFrom(ReactiveFormsModule),
     provideAnimations(),
     provideToastr({

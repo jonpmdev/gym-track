@@ -12,7 +12,7 @@
         y mantén un registro detallado de tu progreso en cada ejercicio.
       </p>
       <button 
-        *ngIf="workouts.length === 0" 
+        *ngIf="workouts && workouts.length === 0" 
         class="primary-button dashboard-button"
         (click)="handleNewWorkout()"
       >
@@ -22,7 +22,7 @@
         Nuevo
       </button>
       <button 
-        *ngIf="workouts.length > 0" 
+        *ngIf="workouts && workouts.length > 0" 
         class="primary-button dashboard-button"
         (click)="handleViewWorkouts()"
       >

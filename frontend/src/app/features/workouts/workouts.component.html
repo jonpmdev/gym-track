@@ -2,10 +2,12 @@
   <div class="flex justify-between items-center mb-6">
     <h1 class="workouts-title">Mis Entrenamientos</h1>
     <button 
+      *ngIf="!showForm"
       class="primary-button"
       (click)="handleNewWorkout()"
     >
-      Nuevo Entrenamiento
+      <i class="fas fa-plus"></i>
+      Nuevo
     </button>
   </div>
 
@@ -58,19 +60,19 @@
           class="workout-action-button view"
           (click)="handleViewWorkout(workout)"
         >
-          Editar entrenamiento
+          <i class="fas fa-edit"></i>
         </button>
         <button 
           class="workout-action-button progress"
           (click)="router.navigate(['/workouts', workout.id, 'progress'])"
         >
-          Registrar progreso
+          <i class="fas fa-chart-line"></i>
         </button>
         <button 
           class="workout-action-button delete"
           (click)="handleDeleteWorkout(workout.id)"
         >
-          Eliminar
+          <i class="fas fa-trash"></i>
         </button>
       </div>
     </div>

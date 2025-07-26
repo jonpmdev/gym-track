@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Workout } from '../../../core/models/workout.model';
 import { Exercise } from '../../../core/models/exercise.model';
+import { WorkoutService } from '../../../core/services/workout.service';
+import { ExerciseService } from '../../../core/services/exercise.service';
 
 interface ExerciseForm extends Omit<Exercise, 'id'> {
   muscleGroups?: string[];
@@ -78,19 +80,45 @@ export class WorkoutFormComponent implements OnInit {
     'Otro',
   ];
 
-  constructor(private toastr: ToastrService) {}
+  constructor(
+    private toastr: ToastrService,
+    private workoutService: WorkoutService,
+    private exerciseService: ExerciseService
+  ) {}
 
   ngOnInit(): void {
     if (this.initialData) {
       this.title = this.initialData.title;
       this.notes = this.initialData.notes || '';
-      this.exercises = [...this.initialData.exercises];
+      
+      // Si hay un ID de entrenamiento, cargar ejercicios desde el servicio
+      if (this.initialData.id) {
+        this.loadExercises(this.initialData.id);
+      } else {
+        this.exercises = [...this.initialData.exercises];
+      }
       
       // Si hay ejercicios, establecer el día activo al primer ejercicio
       if (this.exercises.length > 0) {
         this.activeDay = this.exercises[0].day;
       }
     }
+  }
+
+  // Cargar ejercicios desde el servicio
+  loadExercises(workoutId: string): void {
+    this.exerciseService.getExercisesByWorkout(workoutId).subscribe({
+      next: (exercises) => {
+        this.exercises = exercises;
+        if (exercises.length > 0) {
+          this.activeDay = exercises[0].day;
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar ejercicios:', error);
+        this.toastr.error('Error al cargar los ejercicios');
+      }
+    });
   }
 
   // Método para obtener ejercicios por día
@@ -140,20 +168,64 @@ export class WorkoutFormComponent implements OnInit {
 
     if (this.editMode && this.editIndex !== null) {
       // Actualizar ejercicio existente
-      const updatedExercises = [...this.exercises];
-      updatedExercises[this.editIndex] = { ...this.currentExercise } as Exercise;
-      this.exercises = updatedExercises;
-      this.editMode = false;
-      this.editIndex = null;
-      this.toastr.success('Ejercicio actualizado correctamente');
+      const exercise = this.exercises[this.editIndex];
+      
+      if (exercise.id && this.initialData?.id) {
+        // Si el ejercicio tiene ID, actualizar a través del servicio
+        this.exerciseService.updateExercise(exercise.id, {
+          ...this.currentExercise,
+          workout_id: this.initialData.id
+        }).subscribe({
+          next: (updatedExercise) => {
+            if (updatedExercise) {
+              const updatedExercises = [...this.exercises];
+              updatedExercises[this.editIndex!] = updatedExercise;
+              this.exercises = updatedExercises;
+              this.toastr.success('Ejercicio actualizado correctamente');
+            }
+            this.editMode = false;
+            this.editIndex = null;
+            this.resetExerciseForm();
+          },
+          error: (error) => {
+            console.error('Error al actualizar ejercicio:', error);
+            this.toastr.error('Error al actualizar el ejercicio');
+          }
+        });
+      } else {
+        // Actualizar localmente
+        const updatedExercises = [...this.exercises];
+        updatedExercises[this.editIndex] = { ...this.currentExercise } as Exercise;
+        this.exercises = updatedExercises;
+        this.editMode = false;
+        this.editIndex = null;
+        this.resetExerciseForm();
+        this.toastr.success('Ejercicio actualizado correctamente');
+      }
     } else {
-      // Añadir nuevo ejercicio
-      this.exercises = [...this.exercises, { ...this.currentExercise } as Exercise];
-      this.toastr.success('Ejercicio añadido correctamente');
+      if (this.initialData?.id) {
+        // Si hay un ID de entrenamiento, crear a través del servicio
+        this.exerciseService.createExercise({
+          ...this.currentExercise,
+          workout_id: this.initialData.id
+        }).subscribe({
+          next: (newExercise) => {
+            this.exercises = [...this.exercises, newExercise];
+            this.resetExerciseForm();
+            this.toastr.success('Ejercicio añadido correctamente');
+          },
+          error: (error) => {
+            console.error('Error al crear ejercicio:', error);
+            this.toastr.error('Error al añadir el ejercicio');
+          }
+        });
+      } else {
+        // Añadir localmente
+        this.exercises = [...this.exercises, { ...this.currentExercise } as Exercise];
+        this.resetExerciseForm();
+        this.toastr.success('Ejercicio añadido correctamente');
+      }
     }
-
-    // Resetear el formulario de ejercicio
-    this.resetExerciseForm();
   }
 
   // Método para editar un ejercicio existente
@@ -165,7 +237,7 @@ export class WorkoutFormComponent implements OnInit {
       reps: exercise.reps,
       weight: exercise.weight || 0,
       rest: exercise.rest || '60',
-      muscleGroups: exercise.muscleGroups || [],
+      muscleGroups: exercise.muscleGroups || exercise.muscle_groups || [],
       focus: exercise.focus || '',
       day: exercise.day,
     };
@@ -176,8 +248,25 @@ export class WorkoutFormComponent implements OnInit {
 
   // Método para eliminar un ejercicio
   removeExercise(index: number): void {
-    this.exercises = this.exercises.filter((_, i) => i !== index);
-    this.toastr.info('Ejercicio eliminado');
+    const exercise = this.exercises[index];
+    
+    if (exercise.id) {
+      // Si el ejercicio tiene ID, eliminar a través del servicio
+      this.exerciseService.deleteExercise(exercise.id).subscribe({
+        next: () => {
+          this.exercises = this.exercises.filter((_, i) => i !== index);
+          this.toastr.info('Ejercicio eliminado');
+        },
+        error: (error) => {
+          console.error('Error al eliminar ejercicio:', error);
+          this.toastr.error('Error al eliminar el ejercicio');
+        }
+      });
+    } else {
+      // Eliminar localmente
+      this.exercises = this.exercises.filter((_, i) => i !== index);
+      this.toastr.info('Ejercicio eliminado');
+    }
   }
 
   // Método para cancelar la edición
@@ -222,6 +311,7 @@ export class WorkoutFormComponent implements OnInit {
     
     // Asegurarse de que todos los tipos de datos sean correctos
     const validatedExercises = this.exercises.map(exercise => ({
+      id: exercise.id,
       name: String(exercise.name),
       sets: Number(exercise.sets),
       reps: String(exercise.reps),
