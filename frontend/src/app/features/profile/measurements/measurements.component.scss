@@ -1,0 +1,182 @@
+.measurements-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.measurements-container h1 {
+  @apply font-teko text-text-dark text-5xl font-semibold mb-2 uppercase tracking-wider shadow-[2px_2px_0px_rgba(0,0,0,0.1)] leading-none text-center;
+  margin-bottom: 20px;
+}
+
+.measurements-container h2 {
+  @apply font-roboto-condensed text-text-dark text-2xl font-semibold mb-4 uppercase tracking-wider;
+}
+
+.measurements-container h3 {
+  @apply font-roboto-condensed text-text-muted text-xl mb-3 uppercase tracking-wider;
+}
+
+.measurements-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.measurements-form-container,
+.progress-history-container {
+  @apply bg-white bg-opacity-95 p-8 rounded-2xl shadow-lg border border-white border-opacity-20 backdrop-blur-sm transition-all duration-300;
+  
+  &:hover {
+    @apply shadow-xl;
+  }
+}
+
+.measurements-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  @apply mb-5;
+}
+
+.form-group label {
+  @apply block text-gray-800 mb-2 font-bold uppercase tracking-wider text-sm;
+}
+
+.form-group input,
+.form-group textarea {
+  @apply w-full py-3 px-4 border-2 border-gray-200 rounded-lg text-base font-roboto-condensed transition-all duration-300 bg-opacity-90 bg-white;
+  
+  &:focus {
+    @apply border-primary outline-none shadow-[0_0_0_3px_rgba(34,197,94,0.1)] -translate-y-0.5;
+  }
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.measurements-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.submit-button {
+  @apply w-full py-4 px-4 bg-primary text-white border-none rounded-lg text-xl font-bold font-teko cursor-pointer transition-all duration-300 uppercase tracking-wider relative overflow-hidden;
+  margin-top: 10px;
+  
+  &:hover {
+    @apply bg-primary-hover -translate-y-0.5 shadow-[0_5px_15px_rgba(22,163,74,0.3)];
+  }
+  
+  &:disabled {
+    @apply bg-primary-light cursor-not-allowed transform-none shadow-none;
+  }
+  
+  &::before {
+    content: '';
+    @apply absolute top-0 -left-full w-full h-full transition-all duration-500;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255,255,255,0.3),
+      transparent
+    );
+  }
+  
+  &:hover::before {
+    @apply left-full;
+  }
+}
+
+.error-message {
+  @apply bg-red-100 border-l-4 border-error text-red-800 p-4 mb-6 rounded;
+  animation: shake 0.5s ease-in-out;
+}
+
+.success-message {
+  @apply bg-green-100 border-l-4 border-success text-green-800 p-4 mb-6 rounded;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.progress-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.progress-history-item {
+  @apply bg-white bg-opacity-80 rounded-lg p-4 border border-white border-opacity-20 transition-all duration-300;
+  border-left: 4px solid var(--primary-color);
+  
+  &:hover {
+    @apply -translate-y-0.5 shadow-md;
+  }
+}
+
+.progress-date {
+  @apply font-teko text-text-dark text-xl font-semibold uppercase tracking-wider;
+  margin-bottom: 10px;
+}
+
+.progress-details {
+  @apply font-roboto-condensed text-text-muted text-base;
+}
+
+.measurements-details ul {
+  list-style-type: none;
+  padding-left: 15px;
+  margin: 5px 0;
+}
+
+.measurements-details li {
+  margin: 3px 0;
+}
+
+.progress-notes {
+  margin-top: 10px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.no-data {
+  @apply font-roboto-condensed text-text-muted text-lg italic text-center py-5;
+}
+
+.loading {
+  @apply text-center py-12 text-xl text-text-muted;
+}
+
+@media (max-width: 768px) {
+  .measurements-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .measurements-grid {
+    grid-template-columns: 1fr;
+  }
+} 

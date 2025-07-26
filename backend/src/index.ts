@@ -1,10 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import config from './config/config';
-import authRoutes from './routes/authRoutes';
-import workoutRoutes from './routes/workoutRoutes';
-import exerciseRoutes from './routes/exerciseRoutes';
-import exerciseProgressRoutes from './routes/exerciseProgressRoutes';
+import routes from './routes';
 import prisma from './config/prisma';
 
 const app = express();
@@ -14,15 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas
-app.use('/api/auth', authRoutes);
-app.use('/api/workouts', workoutRoutes);
-app.use('/api/exercises', exerciseRoutes);
-app.use('/api/exercise-progress', exerciseProgressRoutes);
-
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.send('API de Gym Track funcionando correctamente');
-});
+app.use('/api', routes);
 
 // Iniciar el servidor
 const PORT = config.PORT;

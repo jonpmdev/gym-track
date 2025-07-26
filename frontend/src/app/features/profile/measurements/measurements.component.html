@@ -1,0 +1,155 @@
+<div class="measurements-container">
+  <h1>Registro de Medidas y Peso</h1>
+  
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+  
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+  
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+  
+  <div *ngIf="!loading" class="measurements-content">
+    <div class="measurements-form-container">
+      <h2>Registrar Nuevas Medidas</h2>
+      <form [formGroup]="measurementsForm" (ngSubmit)="onSubmit()" class="measurements-form">
+        <div class="form-group">
+          <label for="weight">Peso (kg):</label>
+          <input
+            type="number"
+            id="weight"
+            formControlName="weight"
+            min="0"
+            step="0.1"
+            required
+          />
+        </div>
+        
+        <h3>Medidas Corporales (cm)</h3>
+        
+        <div class="measurements-grid">
+          <div class="form-group">
+            <label for="chest">Pecho:</label>
+            <input
+              type="number"
+              id="chest"
+              formControlName="chest"
+              min="0"
+              step="0.1"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="waist">Cintura:</label>
+            <input
+              type="number"
+              id="waist"
+              formControlName="waist"
+              min="0"
+              step="0.1"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="hips">Caderas:</label>
+            <input
+              type="number"
+              id="hips"
+              formControlName="hips"
+              min="0"
+              step="0.1"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="biceps">Bíceps:</label>
+            <input
+              type="number"
+              id="biceps"
+              formControlName="biceps"
+              min="0"
+              step="0.1"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="thighs">Muslos:</label>
+            <input
+              type="number"
+              id="thighs"
+              formControlName="thighs"
+              min="0"
+              step="0.1"
+            />
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="notes">Notas:</label>
+          <textarea
+            id="notes"
+            formControlName="notes"
+            placeholder="Añade notas sobre tu progreso..."
+          ></textarea>
+        </div>
+        
+        <button 
+          type="submit" 
+          class="submit-button"
+          [disabled]="submitting || measurementsForm.invalid"
+        >
+          {{ submitting ? 'Guardando...' : 'Guardar Medidas' }}
+        </button>
+      </form>
+    </div>
+    
+    <div class="progress-history-container">
+      <h2>Historial de Progreso</h2>
+      
+      <div *ngIf="progressHistory.length === 0" class="no-data">
+        No hay registros de progreso anteriores.
+      </div>
+      
+      <div *ngIf="progressHistory.length > 0" class="progress-history-list">
+        <div *ngFor="let progress of progressHistory" class="progress-history-item">
+          <div class="progress-date">
+            {{ formatDate(progress.date) }}
+          </div>
+          
+          <div class="progress-details">
+            <p><strong>Peso:</strong> {{ progress.weight }} kg</p>
+            
+            <div class="measurements-details">
+              <p><strong>Medidas:</strong></p>
+              <ul>
+                <li *ngIf="progress.measurements.chest > 0">
+                  Pecho: {{ progress.measurements.chest }} cm
+                </li>
+                <li *ngIf="progress.measurements.waist > 0">
+                  Cintura: {{ progress.measurements.waist }} cm
+                </li>
+                <li *ngIf="progress.measurements.hips > 0">
+                  Caderas: {{ progress.measurements.hips }} cm
+                </li>
+                <li *ngIf="progress.measurements.biceps > 0">
+                  Bíceps: {{ progress.measurements.biceps }} cm
+                </li>
+                <li *ngIf="progress.measurements.thighs > 0">
+                  Muslos: {{ progress.measurements.thighs }} cm
+                </li>
+              </ul>
+            </div>
+            
+            <div *ngIf="progress.notes" class="progress-notes">
+              <p><strong>Notas:</strong> {{ progress.notes }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

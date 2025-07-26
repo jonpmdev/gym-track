@@ -1,0 +1,54 @@
+.progress-container {
+  @apply bg-white bg-opacity-95 p-12 rounded-2xl shadow-lg border border-white border-opacity-20 backdrop-blur-sm;
+}
+
+.progress-title {
+  @apply font-teko text-text-dark text-4xl font-semibold mb-6 uppercase tracking-wider shadow-[1px_1px_0px_rgba(0,0,0,0.1)] text-center;
+}
+
+.loading-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 3px solid rgba(34, 197, 94, 0.3);
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progress-content {
+  margin-top: 1.5rem;
+}
+
+.workout-id {
+  @apply font-roboto-condensed text-text-muted text-sm mb-6 py-2 px-3 bg-opacity-50 rounded-lg inline-block uppercase tracking-wider;
+  background-color: rgba(243, 244, 246, 0.5);
+}
+
+.progress-section {
+  @apply bg-white bg-opacity-90 p-6 rounded-xl border border-white border-opacity-20 shadow-md my-5 transition-all duration-300;
+  
+  &:hover {
+    @apply -translate-y-0.5 shadow-lg;
+  }
+}
+
+.section-title {
+  @apply font-teko text-text-dark text-2xl font-semibold mb-4 uppercase tracking-wider;
+}
+
+.placeholder-text {
+  @apply font-roboto-condensed text-text-muted italic;
+} 

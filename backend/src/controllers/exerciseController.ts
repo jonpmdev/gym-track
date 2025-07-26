@@ -1,15 +1,22 @@
 import { Request, Response } from 'express';
-import { validationResult } from 'express-validator';
-import exerciseModel from '../models/exerciseModel.prisma';
+import { ExerciseService } from '../services/exerciseService';
 import { IExercise } from '../types/models';
+import container from '../config/di';
 
 class ExerciseController {
+  private exerciseService: ExerciseService;
+
+  constructor() {
+    // Obtener el servicio del contenedor de inyección de dependencias
+    this.exerciseService = container.getService<ExerciseService>('exerciseService');
+  }
+
   // Obtener todos los ejercicios de un entrenamiento
   async getExercisesByWorkout(req: Request, res: Response) {
     try {
       const workoutId = req.params.workoutId;
       
-      const exercises = await exerciseModel.findByWorkoutId(workoutId);
+      const exercises = await this.exerciseService.getExercisesByWorkout(workoutId);
       
       return res.status(200).json({
         success: true,
@@ -29,7 +36,7 @@ class ExerciseController {
     try {
       const exerciseId = req.params.id;
       
-      const exercise = await exerciseModel.findById(exerciseId);
+      const exercise = await this.exerciseService.getExerciseById(exerciseId);
       
       if (!exercise) {
         return res.status(404).json({
@@ -54,26 +61,17 @@ class ExerciseController {
   // Crear un nuevo ejercicio
   async createExercise(req: Request, res: Response) {
     try {
-      // Verificar errores de validación
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          errors: errors.array()
-        });
-      }
-      
       const exerciseData: Omit<IExercise, 'id' | 'created_at' | 'updated_at'> = req.body;
       
-      // Validación adicional
+      // Validación adicional de datos requeridos
       if (!exerciseData.name || !exerciseData.workout_id) {
         return res.status(400).json({
           success: false,
-          message: 'Debe incluir al menos un ejercicio'
+          message: 'Debe incluir al menos un nombre y un ID de entrenamiento'
         });
       }
       
-      const newExercise = await exerciseModel.create(exerciseData);
+      const newExercise = await this.exerciseService.createExercise(exerciseData);
       
       return res.status(201).json({
         success: true,
@@ -91,19 +89,10 @@ class ExerciseController {
   // Actualizar un ejercicio existente
   async updateExercise(req: Request, res: Response) {
     try {
-      // Verificar errores de validación
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          errors: errors.array()
-        });
-      }
-      
       const exerciseId = req.params.id;
       const exerciseData: Partial<IExercise> = req.body;
       
-      const updatedExercise = await exerciseModel.update(exerciseId, exerciseData);
+      const updatedExercise = await this.exerciseService.updateExercise(exerciseId, exerciseData);
       
       if (!updatedExercise) {
         return res.status(404).json({
@@ -130,7 +119,7 @@ class ExerciseController {
     try {
       const exerciseId = req.params.id;
       
-      const deleted = await exerciseModel.delete(exerciseId);
+      const deleted = await this.exerciseService.deleteExercise(exerciseId);
       
       if (!deleted) {
         return res.status(404).json({
@@ -155,26 +144,10 @@ class ExerciseController {
   // Marcar ejercicio como completado/no completado
   async toggleExerciseCompleted(req: Request, res: Response) {
     try {
-      // Verificar errores de validación
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          errors: errors.array()
-        });
-      }
-      
       const exerciseId = req.params.id;
       const { completed } = req.body;
       
-      if (typeof completed !== 'boolean') {
-        return res.status(400).json({
-          success: false,
-          message: 'El valor de "completed" debe ser un booleano'
-        });
-      }
-      
-      const updatedExercise = await exerciseModel.updateCompleted(exerciseId, completed);
+      const updatedExercise = await this.exerciseService.toggleExerciseCompleted(exerciseId, completed);
       
       if (!updatedExercise) {
         return res.status(404).json({

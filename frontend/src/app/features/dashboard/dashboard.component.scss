@@ -1,0 +1,50 @@
+/* Los estilos del dashboard ahora siguen el estilo de autenticación */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.dashboard-title {
+  @apply font-teko text-text-dark text-5xl font-semibold mb-2 uppercase tracking-wider shadow-[2px_2px_0px_rgba(0,0,0,0.1)] leading-none text-center;
+}
+
+.dashboard-subtitle {
+  @apply font-roboto-condensed text-text-muted text-lg mb-10 uppercase tracking-wider text-center;
+}
+
+.dashboard-card {
+  @apply bg-white bg-opacity-95 p-10 rounded-2xl shadow-lg border border-white border-opacity-20 transition-all duration-300 flex flex-col h-full my-3 mx-2 backdrop-blur-sm;
+  
+  &:hover {
+    @apply -translate-y-1.5 shadow-xl;
+  }
+  
+  h2 {
+    @apply mb-7 text-2xl px-2 font-semibold text-center uppercase tracking-wider;
+  }
+  
+  p {
+    @apply mb-9 px-2 flex-grow leading-relaxed;
+  }
+}
+
+.primary-button.dashboard-button {
+  @apply w-auto min-w-[200px] py-3.5 px-7 flex items-center justify-center gap-2.5 mt-auto mx-auto;
+  
+  &::before {
+    content: '';
+    @apply absolute top-0 -left-full w-full h-full transition-all duration-500;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255,255,255,0.3),
+      transparent
+    );
+  }
+  
+  &:hover::before {
+    @apply left-full;
+  }
+} 

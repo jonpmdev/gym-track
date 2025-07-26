@@ -1,0 +1,28 @@
+<header class="app-header">
+  <div class="header-container">
+    <div class="logo">
+      <a routerLink="/dashboard">Gym Track</a>
+    </div>
+    
+    <button class="menu-toggle" (click)="toggleMenu()">
+      <span class="menu-icon"></span>
+    </button>
+    
+    <nav class="main-nav" [class.open]="isMenuOpen">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a routerLink="/dashboard" routerLinkActive="active">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/workouts" routerLinkActive="active">Entrenamientos</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/profile" routerLinkActive="active">Perfil</a>
+        </li>
+        <li class="nav-item">
+          <button class="logout-button" (click)="logout()">Cerrar Sesión</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header> 

@@ -5,8 +5,8 @@ Aplicación para seguimiento de entrenamiento en el gimnasio. Permite llevar un 
 ## Tecnologías
 
 ### Frontend
-- Next.js 14 (React)
-- Tailwind CSS
+- Angular
+- SCSS
 - TypeScript
 
 ### Backend
@@ -20,17 +20,15 @@ Aplicación para seguimiento de entrenamiento en el gimnasio. Permite llevar un 
 
 ```
 gym-track/
-├── frontend/          # Aplicación Next.js
+├── frontend/          # Aplicación Angular
 │   ├── src/
-│   │   ├── app/      # Páginas de la aplicación
-│   │   │   ├── login/      # Página de inicio de sesión
-│   │   │   ├── register/   # Página de registro
-│   │   │   ├── dashboard/  # Panel principal
-│   │   │   └── workouts/   # Gestión de entrenamientos
-│   │   ├── components/     # Componentes reutilizables
-│   │   │   ├── DashboardLayout.tsx  # Layout principal
-│   │   │   └── WorkoutForm.tsx      # Formulario de entrenamientos
-│   │   └── types/         # Definiciones de tipos TypeScript
+│   │   ├── app/       # Código principal
+│   │   │   ├── core/        # Servicios singleton, modelos, guards, interceptores
+│   │   │   ├── shared/      # Componentes, pipes y directivas reutilizables
+│   │   │   ├── features/    # Módulos funcionales (auth, workouts, profile, etc.)
+│   │   │   └── layout/      # Componentes de estructura (header, footer, etc.)
+│   │   ├── assets/          # Recursos estáticos
+│   │   └── environments/    # Configuraciones de entorno
 │   └── ...
 └── backend/           # API con Express.js
     ├── prisma/        # Configuración de Prisma ORM
@@ -109,8 +107,23 @@ npm run dev
 
 # En otra terminal (frontend)
 cd frontend
-npm run dev
+ng serve
 ```
+
+## Principios SOLID Aplicados
+
+- **Single Responsibility**: Cada componente y servicio tiene una única responsabilidad.
+- **Open/Closed**: La estructura permite extender funcionalidades sin modificar código existente.
+- **Liskov Substitution**: Los componentes se diseñaron para ser intercambiables.
+- **Interface Segregation**: Se utilizan interfaces específicas en lugar de generales.
+- **Dependency Inversion**: Se inyectan dependencias en lugar de crearlas dentro de los componentes.
+
+## Optimizaciones de Rendimiento
+
+- Lazy loading para módulos
+- Precarga de módulos para mejorar la experiencia de navegación
+- Optimización de metadatos para SEO
+- Carga eficiente de fuentes
 
 ## Funcionalidades Implementadas
 
@@ -131,13 +144,14 @@ npm run dev
 - ✅ Validación de datos en backend
 
 ### Interfaz de Usuario
-- ✅ Diseño responsive con Tailwind CSS
+- ✅ Diseño responsive
 - ✅ Layout principal con navegación intuitiva
 - ✅ Dashboard informativo
 - ✅ Navegación protegida
 - ✅ Botón de cierre de sesión
 - ✅ Interfaz en español
 - ✅ Estilos modulares por componente [[memory:3119071]]
+- ✅ Formularios reactivos
 
 ## Funcionalidades Pendientes
 
@@ -172,6 +186,10 @@ npm run dev
 - [ ] Frecuencia de entrenamiento
 - [ ] Tiempo total de entrenamiento
 - [ ] Exportación de estadísticas
+
+### Otras Mejoras
+- [ ] Implementar PWA (Progressive Web App)
+- [ ] Añadir más pruebas unitarias y de integración
 
 ## API Endpoints
 

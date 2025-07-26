@@ -1,0 +1,99 @@
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.profile-container h1 {
+  @apply font-teko text-text-dark text-5xl font-semibold mb-2 uppercase tracking-wider shadow-[2px_2px_0px_rgba(0,0,0,0.1)] leading-none text-center;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
+}
+
+.profile-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.profile-section {
+  @apply bg-white bg-opacity-95 p-10 rounded-2xl shadow-lg border border-white border-opacity-20 transition-all duration-300 flex flex-col h-full backdrop-blur-sm;
+  
+  &:hover {
+    @apply -translate-y-1.5 shadow-xl;
+  }
+}
+
+.profile-section h2 {
+  @apply mb-7 text-2xl px-2 font-semibold text-center uppercase tracking-wider;
+  color: var(--text-dark);
+}
+
+.profile-section p {
+  @apply mb-9 px-2 flex-grow leading-relaxed;
+  color: var(--text-muted);
+}
+
+.profile-button {
+  @apply w-auto min-w-[200px] py-3.5 px-7 flex items-center justify-center gap-2.5 mt-auto mx-auto;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  
+  &:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(22,163,74,0.3);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255,255,255,0.3),
+      transparent
+    );
+    transition: all 0.5s ease;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+  
+  &.disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    
+    &:hover {
+      background-color: #a0aec0;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    &::before {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-sections {
+    grid-template-columns: 1fr;
+  }
+} 

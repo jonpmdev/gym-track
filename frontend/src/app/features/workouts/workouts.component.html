@@ -1,0 +1,87 @@
+<div class="workouts-container">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="workouts-title">Mis Entrenamientos</h1>
+    <button 
+      class="primary-button"
+      (click)="handleNewWorkout()"
+    >
+      Nuevo Entrenamiento
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="spinner"></div>
+  </div>
+
+  <div *ngIf="!loading && !showForm" class="workouts-list">
+    <div *ngIf="workouts.length === 0" class="empty-state">
+      <p>No hay entrenamientos registrados.</p>
+      <p>¡Comienza creando uno nuevo!</p>
+      <button 
+        class="primary-button mt-4"
+        (click)="handleNewWorkout()"
+      >
+        Crear mi primer entrenamiento
+      </button>
+    </div>
+
+    <div *ngFor="let workout of workouts" class="workout-card">
+      <div class="workout-card-header">
+        <h3 class="workout-card-title">{{ workout.title }}</h3>
+      </div>
+
+      <div class="workout-card-body">
+        <div class="workout-stats">
+          <div class="workout-stat">
+            <span class="workout-stat-label">Ejercicios</span>
+            <span class="workout-stat-value">{{ workout.exercises.length }}</span>
+          </div>
+          <div class="workout-stat">
+            <span class="workout-stat-label">Días</span>
+            <span class="workout-stat-value">{{ getExercisesByDay(workout).length }}</span>
+          </div>
+        </div>
+
+        <div class="workout-days">
+          <span *ngFor="let day of getExercisesByDay(workout)" class="workout-day-tag">
+            {{ day }}
+          </span>
+        </div>
+
+        <div *ngIf="workout.notes" class="workout-notes">
+          <p>{{ workout.notes }}</p>
+        </div>
+      </div>
+
+      <div class="workout-card-footer">
+        <button 
+          class="workout-action-button view"
+          (click)="handleViewWorkout(workout)"
+        >
+          Editar entrenamiento
+        </button>
+        <button 
+          class="workout-action-button progress"
+          (click)="router.navigate(['/workouts', workout.id, 'progress'])"
+        >
+          Registrar progreso
+        </button>
+        <button 
+          class="workout-action-button delete"
+          (click)="handleDeleteWorkout(workout.id)"
+        >
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de entrenamiento -->
+  <div *ngIf="showForm">
+    <app-workout-form
+      [initialData]="editWorkout || undefined"
+      (onSubmit)="handleFormSubmit($event)"
+      (onCancel)="handleFormCancel()"
+    ></app-workout-form>
+  </div>
+</div> 

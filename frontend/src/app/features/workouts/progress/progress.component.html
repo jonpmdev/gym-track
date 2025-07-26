@@ -1,0 +1,16 @@
+<div class="progress-container">
+  <h1 class="progress-title">Progreso del Entrenamiento</h1>
+  
+  <div *ngIf="loading" class="loading-spinner-container">
+    <div class="spinner"></div>
+  </div>
+  
+  <div *ngIf="!loading" class="progress-content">
+    <p class="workout-id">ID del entrenamiento: {{ workoutId }}</p>
+    
+    <div class="progress-section">
+      <h2 class="section-title">Registro de Progreso</h2>
+      <p class="placeholder-text">Esta sección está en desarrollo. Aquí podrás registrar tu progreso para este entrenamiento.</p>
+    </div>
+  </div>
+</div> 

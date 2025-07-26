@@ -1,0 +1,268 @@
+<form (ngSubmit)="handleSubmit()" class="workout-form">
+  <h2 class="workout-form-title">
+    {{ initialData ? 'Editar Entrenamiento' : 'Nuevo Entrenamiento' }}
+  </h2>
+  
+  <!-- Sección de información general -->
+  <div class="workout-form-section">
+    <h3 class="workout-form-section-title">Información General</h3>
+    <div class="form-group">
+      <label for="title" class="form-label">
+        Título del entrenamiento *
+      </label>
+      <input
+        type="text"
+        id="title"
+        [(ngModel)]="title"
+        name="title"
+        required
+        class="form-input"
+        placeholder="Ej: Entrenamiento de fuerza semana 1"
+      />
+    </div>
+  </div>
+  
+  <!-- Sección de ejercicios -->
+  <div class="workout-form-section">
+    <h3 class="workout-form-section-title">Ejercicios</h3>
+    
+    <!-- Pestañas para los días de la semana -->
+    <div class="days-tabs-container">
+      <div class="days-tabs">
+        <div
+          *ngFor="let day of DAYS_OF_WEEK"
+          class="day-tab"
+          [class.active]="activeDay === day"
+          (click)="setActiveDay(day)"
+        >
+          {{ day }} 
+          <span *ngIf="getExercisesByDay(day).length > 0" class="exercise-count">
+            ({{ getExercisesByDay(day).length }})
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Contenido del día activo -->
+    <div class="day-content">
+      <h4>Ejercicios para {{ activeDay }}</h4>
+      
+      <!-- Lista de ejercicios del día actual -->
+      <div class="exercises-list">
+        <div *ngIf="getExercisesByDay(activeDay).length > 0">
+          <div *ngFor="let exercise of getExercisesByDay(activeDay); let i = index" class="exercise-item">
+            <div class="exercise-content">
+              <div class="exercise-info">
+                <h5 class="exercise-name">{{ exercise.name }}</h5>
+                <p class="exercise-details">
+                  {{ exercise.sets }} series x {{ exercise.reps }} repeticiones
+                  {{ exercise.weight ? ' x ' + exercise.weight + ' kg' : '' }}
+                  {{ exercise.rest ? ' | Descanso: ' + exercise.rest + 's' : '' }}
+                </p>
+                <p *ngIf="(exercise.muscleGroups?.length || exercise.focus)" class="exercise-metadata">
+                  {{ exercise.muscleGroups && exercise.muscleGroups.length > 0 ? 'Grupos: ' + exercise.muscleGroups.join(', ') : '' }}
+                  {{ exercise.muscleGroups && exercise.muscleGroups.length > 0 && exercise.focus ? ' | ' : '' }}
+                  {{ exercise.focus ? 'Enfoque: ' + exercise.focus : '' }}
+                </p>
+              </div>
+              <div class="exercise-actions">
+                <button
+                  type="button"
+                  (click)="editExercise(exercises.indexOf(exercise))"
+                  class="workout-action-button view"
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  (click)="removeExercise(exercises.indexOf(exercise))"
+                  class="workout-action-button delete"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="getExercisesByDay(activeDay).length === 0" class="no-exercises-message">
+          No hay ejercicios para {{ activeDay }}. ¡Añade uno nuevo!
+        </p>
+      </div>
+      
+      <!-- Formulario para añadir/editar ejercicio -->
+      <div class="exercise-form-container">
+        <h5>
+          {{ editMode ? 'Editar ejercicio' : 'Añadir nuevo ejercicio' }}
+        </h5>
+        
+        <!-- Uso un div en lugar de form para evitar conflictos con el formulario principal -->
+        <div class="exercise-form">
+          <div class="form-group">
+            <label for="exerciseName" class="form-label">
+              Nombre del ejercicio *
+            </label>
+            <input
+              type="text"
+              id="exerciseName"
+              [(ngModel)]="currentExercise['name']"
+              name="exerciseName"
+              (ngModelChange)="handleExerciseChange('name', $event)"
+              class="form-input"
+              placeholder="Ej: Press de banca"
+            />
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sets" class="form-label">
+                Series *
+              </label>
+              <input
+                type="number"
+                id="sets"
+                min="1"
+                [(ngModel)]="currentExercise['sets']"
+                name="sets"
+                (ngModelChange)="handleExerciseChange('sets', $event)"
+                class="form-input"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="reps" class="form-label">
+                Repeticiones *
+              </label>
+              <input
+                type="text"
+                id="reps"
+                [(ngModel)]="currentExercise['reps']"
+                name="reps"
+                (ngModelChange)="handleExerciseChange('reps', $event)"
+                class="form-input"
+                placeholder="Ej: 10 o 5-8"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="weight" class="form-label">
+                Peso (kg)
+              </label>
+              <input
+                type="number"
+                id="weight"
+                min="0"
+                step="0.5"
+                [(ngModel)]="currentExercise['weight']"
+                name="weight"
+                (ngModelChange)="handleExerciseChange('weight', $event)"
+                class="form-input"
+              />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="rest" class="form-label">
+              Descanso (segundos)
+            </label>
+            <input
+              type="text"
+              id="rest"
+              [(ngModel)]="currentExercise['rest']"
+              name="rest"
+              (ngModelChange)="handleExerciseChange('rest', $event)"
+              class="form-input"
+              placeholder="Ej: 60 o 90-120"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">
+              Grupos musculares
+            </label>
+            <div class="checkbox-group">
+              <div 
+                *ngFor="let group of MUSCLE_GROUPS"
+                class="checkbox-item"
+                [class.selected]="currentExercise['muscleGroups']?.includes(group)"
+                (click)="handleMuscleGroupToggle(group)"
+              >
+                {{ group }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="focus" class="form-label">
+              Enfoque
+            </label>
+            <select
+              id="focus"
+              [(ngModel)]="currentExercise['focus']"
+              name="focus"
+              (ngModelChange)="handleExerciseChange('focus', $event)"
+              class="form-input"
+            >
+              <option value="">Seleccionar</option>
+              <option *ngFor="let focus of FOCUS_TYPES" [value]="focus">
+                {{ focus }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="flex justify-end space-x-2 mt-4">
+            <button
+              *ngIf="editMode"
+              type="button"
+              (click)="cancelEdit()"
+              class="secondary-button"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              (click)="addExercise()"
+              class="add-exercise-button"
+            >
+              {{ editMode ? 'Actualizar ejercicio' : 'Añadir ejercicio' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sección de notas -->
+  <div class="workout-form-section">
+    <h3 class="workout-form-section-title">Notas adicionales</h3>
+    <div class="form-group">
+      <label for="notes" class="form-label">
+        Notas
+      </label>
+      <textarea
+        id="notes"
+        [(ngModel)]="notes"
+        name="notes"
+        rows="3"
+        class="form-input"
+        placeholder="Añade notas o comentarios sobre este entrenamiento"
+      ></textarea>
+    </div>
+  </div>
+  
+  <!-- Botones de acción -->
+  <div class="form-actions">
+    <button
+      type="button"
+      (click)="handleCancel()"
+      class="cancel-button"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="primary-button"
+    >
+      {{ initialData ? 'Actualizar entrenamiento' : 'Guardar entrenamiento' }}
+    </button>
+  </div>
+</form>
