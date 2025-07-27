@@ -1,0 +1,59 @@
+# Reglas de Desarrollo Backend - Gym Track
+
+## Principios SOLID
+
+### 1. Principio de Responsabilidad Única (SRP)
+- Cada clase o módulo debe tener una única razón para cambiar
+- Mantener controladores, servicios y repositorios con responsabilidades claramente definidas
+- Evitar clases "God" que manejen múltiples responsabilidades
+
+### 2. Principio de Abierto/Cerrado (OCP)
+- Las entidades deben estar abiertas para extensión pero cerradas para modificación
+- Utilizar interfaces y clases abstractas para permitir extensiones sin modificar código existente
+- Implementar patrones como Strategy o Decorator cuando sea apropiado
+
+### 3. Principio de Sustitución de Liskov (LSP)
+- Las subclases deben ser sustituibles por sus clases base
+- Asegurar que las implementaciones de interfaces cumplen con los contratos definidos
+- Evitar romper comportamientos esperados en clases derivadas
+
+### 4. Principio de Segregación de Interfaces (ISP)
+- No forzar a los clientes a depender de interfaces que no utilizan
+- Crear interfaces pequeñas y específicas en lugar de interfaces monolíticas
+- Definir contratos claros entre componentes
+
+### 5. Principio de Inversión de Dependencias (DIP)
+- Depender de abstracciones, no de implementaciones concretas
+- Utilizar inyección de dependencias como se ve en `di.ts`
+- Facilitar el testing mediante mocks de dependencias
+
+## Estructura del Proyecto
+
+- Mantener la separación por capas (controllers, services, repositories)
+- Seguir el patrón de repositorio para acceso a datos
+- Mantener la lógica de negocio en la capa de servicios
+- Los controladores solo deben manejar peticiones HTTP y delegar a servicios
+
+## Manejo de Errores
+
+- Utilizar manejo de errores centralizado
+- Crear tipos de error específicos para diferentes situaciones
+- Proporcionar mensajes de error claros y útiles
+
+## Validación
+
+- Validar todas las entradas de usuario
+- Utilizar el servicio de validación existente
+- Implementar validación tanto a nivel de ruta como a nivel de servicio
+
+## Testing
+
+- Escribir tests unitarios para servicios y repositorios
+- Implementar tests de integración para APIs
+- Mantener una cobertura de código alta
+
+## Seguridad
+
+- Seguir las mejores prácticas de autenticación y autorización
+- Validar y sanitizar todas las entradas de usuario
+- Proteger endpoints sensibles con middleware de autenticación 

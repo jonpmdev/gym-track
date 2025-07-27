@@ -1,0 +1,106 @@
+version: 1.0
+
+rules:
+  # Reglas generales del proyecto
+  - name: "Principios SOLID"
+    description: "Seguir los principios SOLID en todo el código"
+    scope: "global"
+    
+  # Reglas específicas para el backend
+  - name: "Backend - Responsabilidad Única"
+    description: "Cada clase o módulo debe tener una única razón para cambiar"
+    scope: "backend/**"
+    
+  - name: "Backend - Estructura por Capas"
+    description: "Mantener la separación por capas (controllers, services, repositories)"
+    scope: "backend/src/**"
+    
+  - name: "Backend - Lógica de Negocio en Servicios"
+    description: "Mantener la lógica de negocio en la capa de servicios"
+    scope: "backend/src/services/**"
+    
+  - name: "Backend - Controladores Ligeros"
+    description: "Los controladores solo deben manejar peticiones HTTP y delegar a servicios"
+    scope: "backend/src/controllers/**"
+    
+  - name: "Backend - Inversión de Dependencias"
+    description: "Utilizar inyección de dependencias como se ve en di.ts"
+    scope: "backend/src/**"
+    
+  - name: "Backend - Validación"
+    description: "Validar todas las entradas de usuario"
+    scope: "backend/src/**"
+    
+  - name: "Backend - Seguridad"
+    description: "Proteger endpoints sensibles con middleware de autenticación"
+    scope: "backend/src/routes/**"
+    
+  # Reglas específicas para el frontend
+  - name: "Frontend - Responsabilidad Única"
+    description: "Cada componente debe tener una única razón para cambiar"
+    scope: "frontend/src/app/**"
+    
+  - name: "Frontend - Estructura por Características"
+    description: "Mantener la estructura de carpetas por características (features)"
+    scope: "frontend/src/app/features/**"
+    
+  - name: "Frontend - Componentes Compartidos"
+    description: "Mantener los componentes compartidos en la carpeta shared"
+    scope: "frontend/src/app/shared/**"
+    
+  - name: "Frontend - Estilos por Componente"
+    description: "Los estilos específicos deben colocarse en el archivo SCSS de cada componente, no en el archivo global"
+    scope: "frontend/src/app/**/*.scss"
+    priority: "high"
+    
+  - name: "Frontend - Consistencia Visual"
+    description: "Utilizar las clases de Tailwind existentes para mantener consistencia visual"
+    scope: "frontend/src/app/**/*.html"
+    priority: "high"
+    
+  - name: "Frontend - Inyección de Dependencias"
+    description: "Utilizar inyección de dependencias para servicios"
+    scope: "frontend/src/app/**/*.ts"
+    
+  - name: "Frontend - Testing"
+    description: "Escribir tests unitarios para componentes y servicios"
+    scope: "frontend/src/app/**/*.spec.ts"
+
+files:
+  - path: "backend/cursorrules.md"
+    description: "Reglas detalladas para el desarrollo backend"
+    
+  - path: "frontend/cursorrules.md"
+    description: "Reglas detalladas para el desarrollo frontend"
+
+suggestions:
+  # Sugerencias para el backend
+  - pattern: "new\\s+[A-Z][a-zA-Z]+\\("
+    scope: "backend/src/**/*.ts"
+    message: "Considera usar inyección de dependencias en lugar de instanciación directa"
+    
+  - pattern: "req\\.body\\.[a-zA-Z]+"
+    scope: "backend/src/controllers/**/*.ts"
+    message: "Valida todas las entradas de usuario antes de procesarlas"
+    
+  - pattern: "throw\\s+new\\s+Error\\("
+    scope: "backend/src/**/*.ts"
+    message: "Considera usar tipos de error específicos para diferentes situaciones"
+    
+  # Sugerencias para el frontend
+  - pattern: "styles\\.scss"
+    scope: "frontend/src/app/**/*.ts"
+    message: "Los estilos específicos deben colocarse en el archivo SCSS de cada componente"
+    priority: "high"
+    
+  - pattern: "!important"
+    scope: "frontend/src/app/**/*.scss"
+    message: "Evita usar !important, estructura mejor tus selectores CSS"
+    
+  - pattern: "subscribe\\(\\)"
+    scope: "frontend/src/app/**/*.ts"
+    message: "No olvides desuscribirte de los observables para evitar memory leaks"
+    
+  - pattern: "ngOnInit\\(\\)"
+    scope: "frontend/src/app/**/*.ts"
+    message: "Asegúrate de implementar ngOnDestroy si estás usando ngOnInit con suscripciones" 

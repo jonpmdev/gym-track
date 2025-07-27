@@ -1,0 +1,69 @@
+# Reglas de Desarrollo Frontend - Gym Track
+
+## Principios SOLID
+
+### 1. Principio de Responsabilidad Única (SRP)
+- Cada componente debe tener una única razón para cambiar
+- Separar la lógica de presentación de la lógica de negocio
+- Utilizar servicios para la comunicación con APIs
+- Evitar componentes que hagan demasiadas cosas
+
+### 2. Principio de Abierto/Cerrado (OCP)
+- Los componentes deben estar abiertos para extensión pero cerrados para modificación
+- Utilizar herencia de componentes y directivas cuando sea apropiado
+- Implementar estrategias de composición sobre herencia cuando sea posible
+
+### 3. Principio de Sustitución de Liskov (LSP)
+- Los componentes derivados deben poder sustituir a sus componentes base
+- Mantener consistencia en las interfaces de los componentes
+- Respetar los contratos de entrada/salida en los componentes
+
+### 4. Principio de Segregación de Interfaces (ISP)
+- Crear componentes pequeños y específicos en lugar de componentes monolíticos
+- Utilizar inputs y outputs específicos en lugar de objetos grandes
+- Dividir componentes grandes en subcomponentes más manejables
+
+### 5. Principio de Inversión de Dependencias (DIP)
+- Depender de abstracciones, no de implementaciones concretas
+- Utilizar inyección de dependencias para servicios
+- Facilitar el testing mediante mocks de servicios
+
+## Estructura de Componentes
+
+- Mantener la estructura de carpetas por características (features)
+- Seguir el patrón container/presentational cuando sea apropiado
+- Utilizar módulos para agrupar funcionalidades relacionadas
+- Mantener los componentes compartidos en la carpeta shared
+
+## Estilos y Diseño
+
+- **IMPORTANTE:** Mantener consistencia con los estilos existentes en cualquier desarrollo nuevo o modificación [[memory:3119071]]
+- Los estilos específicos deben colocarse en el archivo SCSS de cada componente, no en el archivo global
+- Utilizar las clases de Tailwind existentes para mantener consistencia visual
+- Respetar la paleta de colores, tipografía y espaciado de la aplicación
+- Mantener responsividad en todos los componentes nuevos
+- Seguir el mismo patrón de diseño para formularios, botones y otros elementos de UI
+
+## Estado de la Aplicación
+
+- Manejar el estado de forma predecible y transparente
+- Utilizar servicios para estado compartido entre componentes
+- Evitar estado duplicado en diferentes partes de la aplicación
+
+## Rendimiento
+
+- Optimizar el rendimiento mediante lazy loading de módulos
+- Implementar estrategias de detección de cambios eficientes
+- Evitar cálculos innecesarios en los ciclos de vida de los componentes
+
+## Accesibilidad
+
+- Asegurar que todos los componentes sean accesibles
+- Utilizar atributos ARIA cuando sea necesario
+- Mantener un contraste adecuado para texto y elementos interactivos
+
+## Testing
+
+- Escribir tests unitarios para componentes y servicios
+- Implementar tests de integración para flujos de usuario críticos
+- Mantener una cobertura de código alta 
