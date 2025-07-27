@@ -1,3 +1,8 @@
+---
+description: "Reglas de desarrollo para el frontend de Gym Track"
+globs: ["frontend/**/*.ts", "frontend/**/*.html", "frontend/**/*.scss"]
+alwaysApply: true
+---
 # Reglas de Desarrollo Frontend - Gym Track
 
 ## Principios SOLID

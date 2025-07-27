@@ -1,3 +1,8 @@
+---
+description: "Reglas de desarrollo para el backend de Gym Track"
+globs: ["backend/**/*.ts"]
+alwaysApply: true
+---
 # Reglas de Desarrollo Backend - Gym Track
 
 ## Principios SOLID
