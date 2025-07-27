@@ -63,8 +63,10 @@ export class WorkoutsComponent implements OnInit {
 
   fetchSingleWorkout(id: string): void {
     this.loading = true;
+    console.log('Fetching workout with ID:', id);
     this.workoutService.getWorkout(id).subscribe({
       next: (workout) => {
+        console.log('Workout fetched successfully:', workout);
         this.editWorkout = workout;
         this.showForm = true;
         this.loading = false;
@@ -135,7 +137,8 @@ export class WorkoutsComponent implements OnInit {
   }
 
   handleViewWorkout(workout: Workout): void {
-    this.router.navigate(['/workouts', workout.id]);
+    // Cargar el entrenamiento para edición
+    this.fetchSingleWorkout(workout.id);
   }
 
   handleNewWorkout(): void {
@@ -145,7 +148,10 @@ export class WorkoutsComponent implements OnInit {
   handleFormCancel(): void {
     this.showForm = false;
     this.editWorkout = null;
-    this.router.navigate(['/workouts']);
+    // Asegurar que se limpie la URL y se recarguen los datos
+    this.router.navigate(['/workouts']).then(() => {
+      this.fetchWorkouts();
+    });
   }
 
   handleFormSubmit(workoutData: any): void {
@@ -159,6 +165,25 @@ export class WorkoutsComponent implements OnInit {
   // Agrupar ejercicios por día
   getExercisesByDay(workout: Workout): string[] {
     const days = new Set(workout.exercises.map(exercise => exercise.day));
-    return Array.from(days);
+    const daysArray = Array.from(days);
+    
+    // Orden de los días de la semana
+    const dayOrder: Record<string, number> = {
+      'Lunes': 1,
+      'Martes': 2,
+      'Miércoles': 3,
+      'Jueves': 4,
+      'Viernes': 5,
+      'Sábado': 6,
+      'Domingo': 7
+    };
+    
+    // Ordenar los días según el orden de la semana
+    return daysArray.sort((a, b) => {
+      // Usar valores predeterminados si el día no está en dayOrder
+      const orderA = dayOrder[a] || 999;
+      const orderB = dayOrder[b] || 999;
+      return orderA - orderB;
+    });
   }
 } 

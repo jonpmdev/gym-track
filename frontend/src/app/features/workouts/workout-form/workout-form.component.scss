@@ -75,6 +75,7 @@
   flex: 1;
   text-align: center;
   margin: 0 0.25rem;
+  min-width: 85px; /* Ancho mínimo para cada pestaña */
 
   &:first-child {
     margin-left: 0;
@@ -179,6 +180,18 @@
 }
 
 /* Estilos para los botones de acción */
+.flex.justify-end {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.flex.space-x-2 {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
 .workout-action-button {
   font-size: 0.875rem;
   font-weight: 500;
@@ -304,8 +317,8 @@
 }
 
 .secondary-button {
-  background-color: #e5e7eb;
-  color: #4b5563;
+  background-color: #ef4444;
+  color: white;
   padding: 0.85rem;
   border-radius: 8px;
   font-weight: 600;
@@ -315,13 +328,13 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   border: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 .secondary-button:hover {
-  background-color: #d1d5db;
+  background-color: #dc2626;
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
 }
 
 /* Sección para agregar nuevo ejercicio */
@@ -368,6 +381,16 @@
     background-color: #1d4ed8;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.add-exercise-button[style*="background-color: #ef4444"] {
+  background-color: #ef4444;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+  
+  &:hover {
+    background-color: #dc2626;
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
   }
 }
 
@@ -550,5 +573,25 @@
   .form-actions button {
     width: auto;
     min-width: auto;
+  }
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: #374151;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: #e5e7eb;
+  }
+  
+  i {
+    margin-right: 0.5rem;
   }
 }

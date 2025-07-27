@@ -1,14 +1,24 @@
 <div class="workouts-container">
   <div class="flex justify-between items-center mb-6">
     <h1 class="workouts-title">Mis Entrenamientos</h1>
-    <button 
-      *ngIf="!showForm"
-      class="primary-button"
-      (click)="handleNewWorkout()"
-    >
-      <i class="fas fa-plus"></i>
-      Nuevo
-    </button>
+    <div>
+      <button 
+        *ngIf="!showForm"
+        class="primary-button"
+        (click)="handleNewWorkout()"
+      >
+        <i class="fas fa-plus"></i>
+        Nuevo
+      </button>
+      <button 
+        *ngIf="showForm"
+        class="secondary-button"
+        (click)="handleFormCancel()"
+      >
+        <i class="fas fa-arrow-left"></i>
+        Volver
+      </button>
+    </div>
   </div>
 
   <div *ngIf="loading" class="flex justify-center items-center h-64">

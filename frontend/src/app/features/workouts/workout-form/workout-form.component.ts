@@ -87,31 +87,81 @@ export class WorkoutFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log('WorkoutFormComponent initialized with initialData:', this.initialData);
+    
     if (this.initialData) {
       this.title = this.initialData.title;
       this.notes = this.initialData.notes || '';
       
       // Si hay un ID de entrenamiento, cargar ejercicios desde el servicio
       if (this.initialData.id) {
+        console.log('Loading exercises for workout ID:', this.initialData.id);
         this.loadExercises(this.initialData.id);
-      } else {
+      } else if (this.initialData.exercises && this.initialData.exercises.length > 0) {
+        // Si no hay ID pero sí hay ejercicios en initialData, usarlos directamente
+        console.log('Using exercises from initialData:', this.initialData.exercises);
         this.exercises = [...this.initialData.exercises];
-      }
-      
-      // Si hay ejercicios, establecer el día activo al primer ejercicio
-      if (this.exercises.length > 0) {
-        this.activeDay = this.exercises[0].day;
+        
+        // Encontrar el primer día que tenga ejercicios
+        if (this.exercises.length > 0) {
+          // Obtener todos los días que tienen ejercicios
+          const daysWithExercises = this.DAYS_OF_WEEK.filter(day => 
+            this.exercises.some(exercise => exercise.day === day)
+          );
+          
+          // Seleccionar el primer día que tenga ejercicios
+          if (daysWithExercises.length > 0) {
+            this.activeDay = daysWithExercises[0];
+          } else {
+            // Si no hay días con ejercicios, usar el día del primer ejercicio como fallback
+            this.activeDay = this.exercises[0].day;
+          }
+          
+          // Actualizar el día del ejercicio actual
+          this.currentExercise = {
+            ...this.currentExercise,
+            day: this.activeDay
+          };
+        }
       }
     }
   }
 
   // Cargar ejercicios desde el servicio
   loadExercises(workoutId: string): void {
+    console.log('Calling exerciseService.getExercisesByWorkout with ID:', workoutId);
     this.exerciseService.getExercisesByWorkout(workoutId).subscribe({
       next: (exercises) => {
-        this.exercises = exercises;
+        console.log('Exercises loaded successfully:', exercises);
+        // Transformar los ejercicios para asegurar compatibilidad con el formulario
+        this.exercises = exercises.map(exercise => {
+          // Asegurar que muscleGroups esté disponible para el formulario
+          return {
+            ...exercise,
+            muscleGroups: exercise.muscle_groups || []
+          };
+        });
+        
+        // Encontrar el primer día que tenga ejercicios
         if (exercises.length > 0) {
-          this.activeDay = exercises[0].day;
+          // Obtener todos los días que tienen ejercicios
+          const daysWithExercises = this.DAYS_OF_WEEK.filter(day => 
+            exercises.some(exercise => exercise.day === day)
+          );
+          
+          // Seleccionar el primer día que tenga ejercicios
+          if (daysWithExercises.length > 0) {
+            this.activeDay = daysWithExercises[0];
+          } else {
+            // Si no hay días con ejercicios, usar el día del primer ejercicio como fallback
+            this.activeDay = exercises[0].day;
+          }
+          
+          // Actualizar el día del ejercicio actual
+          this.currentExercise = {
+            ...this.currentExercise,
+            day: this.activeDay
+          };
         }
       },
       error: (error) => {
@@ -166,23 +216,43 @@ export class WorkoutFormComponent implements OnInit {
       return;
     }
 
+    // Asegurarse de que usamos muscle_groups en lugar de muscleGroups
+    const exerciseToSave: any = {
+      ...this.currentExercise,
+      muscle_groups: this.currentExercise.muscleGroups || []
+    };
+    delete exerciseToSave.muscleGroups;
+
     if (this.editMode && this.editIndex !== null) {
       // Actualizar ejercicio existente
       const exercise = this.exercises[this.editIndex];
       
+      // Preservar el ID del ejercicio original
+      if (exercise.id) {
+        exerciseToSave.id = exercise.id;
+      }
+      
+      // Primero actualizamos localmente para evitar la desaparición
+      const updatedExercises = [...this.exercises];
+      updatedExercises[this.editIndex] = { 
+        ...exerciseToSave,
+        id: exercise.id,
+        muscleGroups: exerciseToSave.muscle_groups // Asegurar que muscleGroups esté disponible
+      } as Exercise;
+      this.exercises = updatedExercises;
+      
       if (exercise.id && this.initialData?.id) {
         // Si el ejercicio tiene ID, actualizar a través del servicio
+        console.log('Actualizando ejercicio con ID:', exercise.id, exerciseToSave);
+        
         this.exerciseService.updateExercise(exercise.id, {
-          ...this.currentExercise,
+          ...exerciseToSave,
           workout_id: this.initialData.id
         }).subscribe({
           next: (updatedExercise) => {
-            if (updatedExercise) {
-              const updatedExercises = [...this.exercises];
-              updatedExercises[this.editIndex!] = updatedExercise;
-              this.exercises = updatedExercises;
-              this.toastr.success('Ejercicio actualizado correctamente');
-            }
+            console.log('Ejercicio actualizado correctamente:', updatedExercise);
+
+            this.toastr.success('Ejercicio actualizado correctamente');
             this.editMode = false;
             this.editIndex = null;
             this.resetExerciseForm();
@@ -190,27 +260,30 @@ export class WorkoutFormComponent implements OnInit {
           error: (error) => {
             console.error('Error al actualizar ejercicio:', error);
             this.toastr.error('Error al actualizar el ejercicio');
+            // No reseteamos el modo de edición en caso de error para permitir reintentar
           }
         });
       } else {
-        // Actualizar localmente
-        const updatedExercises = [...this.exercises];
-        updatedExercises[this.editIndex] = { ...this.currentExercise } as Exercise;
-        this.exercises = updatedExercises;
+        // Solo actualización local
+        this.toastr.success('Ejercicio actualizado correctamente');
         this.editMode = false;
         this.editIndex = null;
         this.resetExerciseForm();
-        this.toastr.success('Ejercicio actualizado correctamente');
       }
     } else {
       if (this.initialData?.id) {
         // Si hay un ID de entrenamiento, crear a través del servicio
         this.exerciseService.createExercise({
-          ...this.currentExercise,
+          ...exerciseToSave,
           workout_id: this.initialData.id
         }).subscribe({
           next: (newExercise) => {
-            this.exercises = [...this.exercises, newExercise];
+            if (newExercise) {
+              this.exercises = [...this.exercises, {
+                ...newExercise,
+                muscleGroups: newExercise.muscle_groups || []
+              }];
+            }
             this.resetExerciseForm();
             this.toastr.success('Ejercicio añadido correctamente');
           },
@@ -221,7 +294,10 @@ export class WorkoutFormComponent implements OnInit {
         });
       } else {
         // Añadir localmente
-        this.exercises = [...this.exercises, { ...this.currentExercise } as Exercise];
+        this.exercises = [...this.exercises, { 
+          ...exerciseToSave,
+          muscleGroups: exerciseToSave.muscle_groups
+        } as Exercise];
         this.resetExerciseForm();
         this.toastr.success('Ejercicio añadido correctamente');
       }
@@ -231,13 +307,16 @@ export class WorkoutFormComponent implements OnInit {
   // Método para editar un ejercicio existente
   editExercise(index: number): void {
     const exercise = this.exercises[index];
+    // Usar muscle_groups si muscleGroups no está disponible
+    const muscleGroups = exercise.muscleGroups || exercise.muscle_groups || [];
+    
     this.currentExercise = {
       name: exercise.name,
       sets: exercise.sets,
       reps: exercise.reps,
       weight: exercise.weight || 0,
       rest: exercise.rest || '60',
-      muscleGroups: exercise.muscleGroups || exercise.muscle_groups || [],
+      muscleGroups: muscleGroups,
       focus: exercise.focus || '',
       day: exercise.day,
     };
@@ -310,19 +389,23 @@ export class WorkoutFormComponent implements OnInit {
     }
     
     // Asegurarse de que todos los tipos de datos sean correctos
-    const validatedExercises = this.exercises.map(exercise => ({
-      id: exercise.id,
-      name: String(exercise.name),
-      sets: Number(exercise.sets),
-      reps: String(exercise.reps),
-      weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
-      rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
-      muscleGroups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
-      // Añadir campo muscle_groups para compatibilidad con el backend
-      muscle_groups: Array.isArray(exercise.muscleGroups) ? exercise.muscleGroups.map(String) : [],
-      focus: exercise.focus !== undefined ? String(exercise.focus) : '',
-      day: String(exercise.day)
-    }));
+    const validatedExercises = this.exercises.map(exercise => {
+      // Usar muscle_groups y eliminar muscleGroups para evitar duplicación
+      const muscleGroups = exercise.muscleGroups || exercise.muscle_groups || [];
+      
+      // Mantener el ID del ejercicio si existe (importante para actualizaciones)
+      return {
+        id: exercise.id,
+        name: String(exercise.name),
+        sets: Number(exercise.sets),
+        reps: String(exercise.reps),
+        weight: exercise.weight !== undefined ? Number(exercise.weight) : 0,
+        rest: exercise.rest !== undefined ? String(exercise.rest) : '60',
+        muscle_groups: muscleGroups.map(String),
+        focus: exercise.focus !== undefined ? String(exercise.focus) : '',
+        day: String(exercise.day)
+      };
+    });
     
     // Enviar los datos del entrenamiento
     this.onSubmit.emit({

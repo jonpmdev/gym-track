@@ -1,7 +1,16 @@
 <form (ngSubmit)="handleSubmit()" class="workout-form">
-  <h2 class="workout-form-title">
-    {{ initialData ? 'Editar Entrenamiento' : 'Nuevo Entrenamiento' }}
-  </h2>
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="workout-form-title">
+      {{ initialData ? 'Editar Entrenamiento' : 'Nuevo Entrenamiento' }}
+    </h2>
+    <button 
+      type="button" 
+      class="back-button" 
+      (click)="handleCancel()"
+    >
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </div>
   
   <!-- Sección de información general -->
   <div class="workout-form-section">
@@ -59,9 +68,9 @@
                   {{ exercise.weight ? ' x ' + exercise.weight + ' kg' : '' }}
                   {{ exercise.rest ? ' | Descanso: ' + exercise.rest + 's' : '' }}
                 </p>
-                <p *ngIf="(exercise.muscleGroups?.length || exercise.focus)" class="exercise-metadata">
-                  {{ exercise.muscleGroups && exercise.muscleGroups.length > 0 ? 'Grupos: ' + exercise.muscleGroups.join(', ') : '' }}
-                  {{ exercise.muscleGroups && exercise.muscleGroups.length > 0 && exercise.focus ? ' | ' : '' }}
+                <p *ngIf="(exercise.muscleGroups?.length || exercise.muscle_groups?.length || exercise.focus)" class="exercise-metadata">
+                  {{ (exercise.muscleGroups && exercise.muscleGroups.length > 0) || (exercise.muscle_groups && exercise.muscle_groups.length > 0) ? 'Grupos: ' + ((exercise.muscleGroups || exercise.muscle_groups) || []).join(', ') : '' }}
+                  {{ ((exercise.muscleGroups && exercise.muscleGroups.length > 0) || (exercise.muscle_groups && exercise.muscle_groups.length > 0)) && exercise.focus ? ' | ' : '' }}
                   {{ exercise.focus ? 'Enfoque: ' + exercise.focus : '' }}
                 </p>
               </div>
@@ -211,22 +220,25 @@
             </select>
           </div>
           
-          <div class="flex justify-end space-x-2 mt-4">
-            <button
-              *ngIf="editMode"
-              type="button"
-              (click)="cancelEdit()"
-              class="secondary-button"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              (click)="addExercise()"
-              class="add-exercise-button"
-            >
-              {{ editMode ? 'Actualizar ejercicio' : 'Añadir ejercicio' }}
-            </button>
+          <div class="flex justify-end mt-4">
+            <div class="flex space-x-2 w-full">
+              <button
+                type="button"
+                (click)="addExercise()"
+                class="add-exercise-button"
+              >
+                {{ editMode ? 'ACTUALIZAR EJERCICIO' : 'AÑADIR EJERCICIO' }}
+              </button>
+              <button
+                *ngIf="editMode"
+                type="button"
+                (click)="cancelEdit()"
+                class="add-exercise-button"
+                style="background-color: #ef4444;"
+              >
+                CANCELAR
+              </button>
+            </div>
           </div>
         </div>
       </div>

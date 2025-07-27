@@ -1,5 +1,10 @@
 <div class="progress-container">
-  <h1 class="progress-title">Progreso del Entrenamiento</h1>
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="progress-title">Progreso del Entrenamiento</h1>
+    <button class="back-button" (click)="navigateBack()">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </div>
   
   <div *ngIf="loading" class="loading-spinner-container">
     <div class="spinner"></div>

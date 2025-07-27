@@ -3,20 +3,17 @@ import { ExerciseService } from '../services/exerciseService';
 import { IExercise } from '../types/models';
 import container from '../config/di';
 
-class ExerciseController {
-  private exerciseService: ExerciseService;
+// Obtener el servicio del contenedor de inyección de dependencias
+const exerciseService = container.getService<ExerciseService>('exerciseService');
 
-  constructor() {
-    // Obtener el servicio del contenedor de inyección de dependencias
-    this.exerciseService = container.getService<ExerciseService>('exerciseService');
-  }
-
+// Exportar directamente un objeto con los métodos del controlador
+export default {
   // Obtener todos los ejercicios de un entrenamiento
   async getExercisesByWorkout(req: Request, res: Response) {
     try {
       const workoutId = req.params.workoutId;
       
-      const exercises = await this.exerciseService.getExercisesByWorkout(workoutId);
+      const exercises = await exerciseService.getExercisesByWorkout(workoutId);
       
       return res.status(200).json({
         success: true,
@@ -29,14 +26,14 @@ class ExerciseController {
         message: 'Error al obtener ejercicios'
       });
     }
-  }
+  },
 
   // Obtener un ejercicio por su ID
   async getExerciseById(req: Request, res: Response) {
     try {
       const exerciseId = req.params.id;
       
-      const exercise = await this.exerciseService.getExerciseById(exerciseId);
+      const exercise = await exerciseService.getExerciseById(exerciseId);
       
       if (!exercise) {
         return res.status(404).json({
@@ -56,7 +53,7 @@ class ExerciseController {
         message: 'Error al obtener ejercicio'
       });
     }
-  }
+  },
 
   // Crear un nuevo ejercicio
   async createExercise(req: Request, res: Response) {
@@ -71,7 +68,7 @@ class ExerciseController {
         });
       }
       
-      const newExercise = await this.exerciseService.createExercise(exerciseData);
+      const newExercise = await exerciseService.createExercise(exerciseData);
       
       return res.status(201).json({
         success: true,
@@ -84,7 +81,7 @@ class ExerciseController {
         message: 'Error al crear ejercicio'
       });
     }
-  }
+  },
 
   // Actualizar un ejercicio existente
   async updateExercise(req: Request, res: Response) {
@@ -92,7 +89,7 @@ class ExerciseController {
       const exerciseId = req.params.id;
       const exerciseData: Partial<IExercise> = req.body;
       
-      const updatedExercise = await this.exerciseService.updateExercise(exerciseId, exerciseData);
+      const updatedExercise = await exerciseService.updateExercise(exerciseId, exerciseData);
       
       if (!updatedExercise) {
         return res.status(404).json({
@@ -112,14 +109,14 @@ class ExerciseController {
         message: 'Error al actualizar ejercicio'
       });
     }
-  }
+  },
 
   // Eliminar un ejercicio
   async deleteExercise(req: Request, res: Response) {
     try {
       const exerciseId = req.params.id;
       
-      const deleted = await this.exerciseService.deleteExercise(exerciseId);
+      const deleted = await exerciseService.deleteExercise(exerciseId);
       
       if (!deleted) {
         return res.status(404).json({
@@ -140,6 +137,4 @@ class ExerciseController {
       });
     }
   }
-}
-
-export default new ExerciseController(); 
+}; 

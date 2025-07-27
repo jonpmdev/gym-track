@@ -15,39 +15,61 @@ export class ExerciseService {
 
   // Obtener ejercicios por ID de entrenamiento
   getExercisesByWorkout(workoutId: string): Observable<Exercise[]> {
-    return this.http.get<Exercise[]>(`${this.apiUrl}/api/exercises/workout/${workoutId}`)
+    console.log(`Calling API: GET ${this.apiUrl}/api/exercises/workout/${workoutId}`);
+    return this.http.get<{success: boolean, data: Exercise[]}>(`${this.apiUrl}/api/exercises/workout/${workoutId}`)
       .pipe(
+        map(response => {
+          console.log('API response for getExercisesByWorkout:', response);
+          return response.data;
+        }),
         catchError(this.handleError<Exercise[]>(`getExercisesByWorkout workoutId=${workoutId}`, []))
       );
   }
 
   // Obtener un ejercicio por ID
   getExerciseById(id: string): Observable<Exercise | null> {
-    return this.http.get<Exercise>(`${this.apiUrl}/api/exercises/${id}`)
+    return this.http.get<{success: boolean, data: Exercise}>(`${this.apiUrl}/api/exercises/${id}`)
       .pipe(
+        map(response => response.data),
         catchError(this.handleError<Exercise | null>(`getExerciseById id=${id}`, null))
       );
   }
 
   // Crear un nuevo ejercicio
   createExercise(exercise: Omit<Exercise, 'id'>): Observable<Exercise> {
-    return this.http.post<Exercise>(`${this.apiUrl}/api/exercises`, exercise)
+    // Asegurarse de que solo se envía muscle_groups y no muscleGroups
+    const exerciseData = { ...exercise };
+    if (exerciseData.muscleGroups) {
+      exerciseData.muscle_groups = exerciseData.muscleGroups;
+      delete exerciseData.muscleGroups;
+    }
+    
+    return this.http.post<{success: boolean, data: Exercise}>(`${this.apiUrl}/api/exercises`, exerciseData)
       .pipe(
+        map(response => response.data),
         catchError(this.handleError<Exercise>('createExercise'))
       );
   }
 
   // Actualizar un ejercicio existente
   updateExercise(id: string, exercise: Partial<Exercise>): Observable<Exercise | null> {
-    return this.http.put<Exercise>(`${this.apiUrl}/api/exercises/${id}`, exercise)
+    // Asegurarse de que solo se envía muscle_groups y no muscleGroups
+    const exerciseData = { ...exercise };
+    if (exerciseData.muscleGroups) {
+      exerciseData.muscle_groups = exerciseData.muscleGroups;
+      delete exerciseData.muscleGroups;
+    }
+    
+    return this.http.put<{success: boolean, data: Exercise}>(`${this.apiUrl}/api/exercises/${id}`, exerciseData)
       .pipe(
+        map(response => response.data),
         catchError(this.handleError<Exercise | null>(`updateExercise id=${id}`, null))
       );
   }
 
   // Eliminar un ejercicio
   deleteExercise(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/exercises/${id}`)
+    return this.http.delete<{success: boolean, message: string}>(`${this.apiUrl}/api/exercises/${id}`)
       .pipe(
         map(() => undefined),
         catchError(this.handleError<void>(`deleteExercise id=${id}`))

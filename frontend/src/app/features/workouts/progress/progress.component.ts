@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-progress',
@@ -13,7 +13,10 @@ export class ProgressComponent implements OnInit {
   workoutId: string | null = null;
   loading = true;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -27,5 +30,9 @@ export class ProgressComponent implements OnInit {
     setTimeout(() => {
       this.loading = false;
     }, 1000);
+  }
+
+  navigateBack(): void {
+    this.router.navigate(['/workouts']);
   }
 } 

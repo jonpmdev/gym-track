@@ -29,24 +29,31 @@ export class WorkoutService {
 
   // Obtener un entrenamiento por ID
   getWorkout(id: string): Observable<Workout> {
-    return this.http.get<Workout>(`${this.apiUrl}/api/workouts/${id}`)
+    console.log(`Calling API: GET ${this.apiUrl}/api/workouts/${id}`);
+    return this.http.get<{workout: Workout}>(`${this.apiUrl}/api/workouts/${id}`)
       .pipe(
+        map(response => {
+          console.log('API response for getWorkout:', response);
+          return response.workout;
+        }),
         catchError(this.handleError<Workout>(`getWorkout id=${id}`))
       );
   }
 
   // Crear un nuevo entrenamiento
   createWorkout(workout: Omit<Workout, 'id'>): Observable<Workout> {
-    return this.http.post<Workout>(`${this.apiUrl}/api/workouts`, workout)
+    return this.http.post<{workout: Workout}>(`${this.apiUrl}/api/workouts`, workout)
       .pipe(
+        map(response => response.workout),
         catchError(this.handleError<Workout>('createWorkout'))
       );
   }
 
   // Actualizar un entrenamiento existente
   updateWorkout(id: string, workout: Omit<Workout, 'id'>): Observable<Workout> {
-    return this.http.put<Workout>(`${this.apiUrl}/api/workouts/${id}`, workout)
+    return this.http.put<{workout: Workout}>(`${this.apiUrl}/api/workouts/${id}`, workout)
       .pipe(
+        map(response => response.workout),
         catchError(this.handleError<Workout>(`updateWorkout id=${id}`))
       );
   }
