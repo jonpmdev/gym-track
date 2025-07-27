@@ -95,6 +95,40 @@ button {
     }
   }
 
+  .back-button {
+    @apply flex items-center py-2 px-4 bg-white border border-gray-200 rounded-lg text-sm font-medium cursor-pointer transition-all duration-300 text-gray-700 hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-[0_2px_5px_rgba(0,0,0,0.1)];
+    
+    i {
+      @apply mr-2;
+    }
+  }
+
+  /* Estilo global para botones de volver */
+  .btn-back {
+    @apply inline-flex items-center py-2 px-4 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    
+    &:hover {
+      @apply bg-gray-50 -translate-y-0.5;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    i {
+      @apply mr-2;
+    }
+  }
+
+  /* Estilo alternativo para el botón volver, similar al de la imagen */
+  button[type="button"]:has(i.fas.fa-arrow-left), 
+  a:has(i.fas.fa-arrow-left),
+  .back-link {
+    @apply inline-flex items-center py-1.5 px-3 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200;
+    
+    i {
+      @apply mr-1.5;
+    }
+  }
+
   .error-message {
     @apply bg-red-100 border-l-4 border-error text-red-800 p-4 mb-6 rounded;
     animation: shake 0.5s ease-in-out;
@@ -238,4 +272,47 @@ button {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Estilos con mayor especificidad para el botón de volver */
+button.btn-back,
+a.btn-back {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.5rem 1rem !important;
+  background-color: white !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: var(--text-muted) !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  text-decoration: none !important;
+  font-family: 'Roboto Condensed', sans-serif !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+button.btn-back:hover,
+a.btn-back:hover {
+  background-color: #f7fafc !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1) !important;
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+button.btn-back:active,
+a.btn-back:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+button.btn-back i,
+a.btn-back i {
+  margin-right: 0.5rem !important;
+  color: var(--primary-color) !important;
+  font-size: 0.875rem !important;
 }

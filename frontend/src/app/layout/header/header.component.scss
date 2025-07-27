@@ -28,12 +28,20 @@
     transition: all 0.3s;
     text-transform: uppercase;
     letter-spacing: 1px;
+    display: flex;
+    align-items: center;
     
     &:hover {
       color: var(--primary-hover);
       text-decoration: none;
       transform: translateY(-2px);
     }
+  }
+  
+  .logo-icon {
+    height: 1.8rem;
+    width: auto;
+    margin-right: 0.5rem;
   }
 }
 
